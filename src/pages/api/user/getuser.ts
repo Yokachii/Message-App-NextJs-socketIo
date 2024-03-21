@@ -8,11 +8,8 @@ export default async function handler(
 ) {
   if (req.method === 'POST') {
     const {id} = req.body;
-    console.log(id,`&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&`)
-
 
     const user = await User.findOne({where:{id:id}})
-    console.log(user?.dataValues,id)
     if(user){
         res
             .status(201)

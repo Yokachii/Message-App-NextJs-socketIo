@@ -8,6 +8,10 @@ const User = sequelize.define('users_message', {
       allowNull: false,
       primaryKey: true
     },
+    username:{
+        type: DataTypes.TEXT,
+        allowNull: false
+    },
     firstname:{
         type: DataTypes.TEXT,
         allowNull: false
@@ -42,7 +46,7 @@ const User = sequelize.define('users_message', {
 (async () => {
     await User.sync({});
 
-    console.log('La table "user" a été charger');
+    console.log('La table "users_message" a été charger');
 })();
 
 export default User;

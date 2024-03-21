@@ -1,0 +1,128 @@
+import { upperFirst } from "@mantine/hooks";
+import { useForm } from "@mantine/form";
+import {
+  TextInput,
+  PasswordInput,
+  Text,
+  Paper,
+  Group,
+  PaperProps,
+  Button,
+  Divider,
+  Stack,
+} from "@mantine/core";
+import ButtonStyled from '../ButtonLoad/index'
+import { useSession, signIn, signOut } from "next-auth/react"
+import { useState } from "react";
+
+
+const login = (props: PaperProps) => {
+  
+    
+    const [buttonState,setButtonState] = useState('ready')
+    const [message,setMessage] = useState({text:"",state:true})
+
+  const { data: session } = useSession()
+
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const form = useForm({
+    initialValues: {
+      username:"",
+      terms: true,
+    },
+
+    validate: {
+    },
+  });
+
+  const handleLogin = async (username:string) => {
+
+    setButtonState(`load`)
+    console.log(username)
+    if(username){
+        const response = await fetch('/api/user/addfriend', {
+            method: 'POST',
+            body: JSON.stringify({username,userId:session?.user.id}),
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        const data = await response.json();
+        
+        setMessage({text:data.message,state:data.success})
+        console.log(data)
+        setButtonState(`ready`)
+        
+        if(data.success){
+            
+            
+            
+        }else{
+
+        }
+    }
+
+
+    // const response = await fetch('/api/auth/signup', {
+    //   method: 'POST',
+    //   body: JSON.stringify(newUser),
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //   },
+    // });
+
+    // const data = await response.json();
+
+    // if(data.success){
+        
+    // }
+    
+
+  }
+
+  return (
+    <>
+      <div
+        style={{
+          maxWidth: "calc(26.25rem * var(--mantine-scale))",
+          marginLeft: "auto",
+          marginRight: "auto",
+        }}
+      >
+
+        {!session?.user?(
+          <p>non</p>
+        ):(
+          <Paper radius="md" p="xl" withBorder {...props}>
+
+          <form onSubmit={form.onSubmit((e) => {handleLogin(e.username)})}>
+
+              <TextInput
+                required
+                label="Username"
+                placeholder="axo"
+                value={form.values.username}
+                onChange={(event) => form.setFieldValue("username", event.currentTarget.value)}
+                error={form.errors.username && "Invalid username"}
+                radius="md"
+              />
+
+                <Group justify="center" mt="xl">
+                    <ButtonStyled buttonState={buttonState} onClick={()=>{}} text="Add" typevar="submit"/>
+                    {message.text?(
+                        <p style={{color:`${message.state?'green':'red'}`}}>{message.text}</p>
+                    ):(
+                        <></>
+                    )}
+                </Group>
+          </form>
+        </Paper>
+        )}
+        
+      </div>
+    </>
+  );
+};
+
+export default login;

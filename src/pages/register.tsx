@@ -26,7 +26,10 @@ const login = (props: PaperProps) => {
   const form = useForm({
     initialValues: {
       email: search?search:``,
-      name: "",
+      // name: "",
+      username:"",
+      firstname:"",
+      lastname:"",
       password: "",
       terms: true,
     },
@@ -37,13 +40,9 @@ const login = (props: PaperProps) => {
     },
   });
 
-  const handleLogin = async (email:string,password:string,name:string) => {
+  const handleLogin = async (email:string,password:string,username:string,firstname:string,lastname:string,) => {
 
-    const newUser = {
-      name,
-      email,
-      password,
-    };
+    const newUser = {email,password,username,firstname,lastname,};
 
     const response = await fetch('/api/auth/signup', {
       method: 'POST',
@@ -90,16 +89,37 @@ const login = (props: PaperProps) => {
 
           <Divider label="Or continue with email (only Oxie SSO users)" labelPosition="center" my="lg" />
 
-          <form onSubmit={form.onSubmit((e) => {handleLogin(e.email,e.password,e.name)})}>
+          <form onSubmit={form.onSubmit((e) => {handleLogin(e.email,e.password,e.username,e.firstname,e.lastname)})}>
             <Stack>
 
               <TextInput
                 required
                 label="Username"
                 placeholder="axo"
-                value={form.values.name}
-                onChange={(event) => form.setFieldValue("name", event.currentTarget.value)}
-                error={form.errors.name && "Invalid name"}
+                value={form.values.username}
+                onChange={(event) => form.setFieldValue("username", event.currentTarget.value)}
+                error={form.errors.username && "Invalid username"}
+                radius="md"
+              />
+
+              <TextInput
+                required
+                label="FirstName"
+                placeholder="axo"
+                value={form.values.firstname}
+                onChange={(event) => form.setFieldValue("firstname", event.currentTarget.value)}
+                error={form.errors.firstname && "Invalid firstname"}
+                radius="md"
+              />
+
+
+              <TextInput
+                required
+                label="LastName"
+                placeholder="axo"
+                value={form.values.lastname}
+                onChange={(event) => form.setFieldValue("lastname", event.currentTarget.value)}
+                error={form.errors.lastname && "Invalid lastname"}
                 radius="md"
               />
 

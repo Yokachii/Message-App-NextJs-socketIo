@@ -12,8 +12,6 @@ export default async function handler(
     const newUser = req.body;
 
     // Check if user exists
-    console.log(newUser,await User.findOne({ where: {email:newUser.email }}))
-
     const userExists = await User.findOne({ where: {email:newUser.email }})
     if (userExists) {
       res.status(422).json({
@@ -24,9 +22,21 @@ export default async function handler(
       return;
     }
 
+    const userExistsName = await User.findOne({ where: {username:newUser.username }})
+    if (userExistsName) {
+      res.status(422).json({
+        success: false,
+        message: 'A user with the same username already exists!!!',
+        userExists: true,
+      });
+      return;
+    }
+
     // Hash Password
     newUser.password = await hashPassword(newUser.password);
 
+
+    const {email,password,username,firstname,lastname} = newUser
     // Store new user
     // const storeUser = new User(newUser);
     // await storeUser.save();
@@ -36,16 +46,15 @@ export default async function handler(
       // lastname:"test tqt",
       // email:newUser.email,
       // password:newUser.password,
-      firstname: newUser.name,
-      lastname: "not yet",
-      email: newUser.email,
-      password: newUser.password,
+      username:username,
+      firstname: firstname,
+      lastname: lastname,
+      email: email,
+      password: password,
       is_active: false,
       created_at: new Date().toISOString()
     }).then((x:any) => {
   
-      // return NextResponse.json({message:'B'})
-      console.log('a')
   
     });
 

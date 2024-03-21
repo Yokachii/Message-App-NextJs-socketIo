@@ -1,13 +1,17 @@
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
- 
-// This function can be marked `async` if using `await` inside
-export function middleware(request: NextRequest) {
-    console.log('babhhahaha')
-//   return NextResponse.redirect(new URL('/home', request.url))
-}
- 
-// See "Matching Paths" below to learn more
-export const config = {
-  matcher: [`/chess/friend`,`/chess/room`,`/chess/create`],
-}
+// import NextAuth from 'next-auth';
+
+// export default auth((req) => {
+//  const { nextUrl } = req;
+
+//  const isAuthenticated = !!req.auth;
+
+//  if (isAuthenticated)
+//   return Response.redirect(new URL(DEFAULT_REDIRECT, nextUrl));
+
+//  if (!isAuthenticated && !isPublicRoute)
+//   return Response.redirect(new URL(ROOT, nextUrl));
+// });
+
+// export const config = {
+//  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+// };

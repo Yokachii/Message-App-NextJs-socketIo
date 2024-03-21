@@ -5,6 +5,8 @@ import io from 'Socket.IO-client'
 import Link from "next/link";
 import styles from './styles.module.scss'
 import { useSession } from "next-auth/react";
+import AddFriend from '@/components/core/AddFriendInputBtn/index'
+import { notifications } from "@mantine/notifications";
 
 type ChatItemType = {
   name:string;
@@ -26,6 +28,7 @@ export default function Room() {
     const [socketId,setSocketId] = useState('')
     const socketRef = useRef(null)
     const [conversations,setConversations] = useState<Array<Record<string,string>>>([])
+    const [receivedFriend,setReceivedFriend] = useState([])
   
     const socketInitializer = async () => {
 
@@ -39,41 +42,25 @@ export default function Room() {
 
             //@ts-ignore
             socketRef.current.emit('get-conversation', {id:user?.id})
-            console.log('sended')
+            //@ts-ignore
+            socketRef.current.emit('set-info', {user})
             
         })
 
         //@ts-ignore
         socketRef.current.on('set-conversation', (data:Record<string,any>) => {
             console.log('a',data)
+            setReceivedFriend(data.friendReceived)
             setConversations(data.conv)
+            console.log(data)
+            notifications.clean()
+            for(let invite of data.friendReceived){
+              console.log(invite)
+              notifications.show({title:`New friend request`,message:`You received a friend request from "${invite.username}"`})
+            }
         })
 
     }
-
-    // const fetchRoom = async () => {
-    //     // Fetch the room
-    //     console.log(`fetched ${user?.email} and ${roomid}`)
-    //     // Fetch the api
-    //     const response = await fetch('/api/chess/getMessage', {
-    //         method: 'POST',
-    //         body: JSON.stringify({token:roomid}),
-    //         headers: {
-    //             'Content-Type': 'application/json',
-    //         },
-    //     });
-
-    //   const data = await response.json();
-
-    //   if(data.success){
-
-    //   }else{
-
-
-    //   }
-    // }
-
-
 
     useEffect(()=>{
         if(!router.isReady) return;
@@ -85,11 +72,10 @@ export default function Room() {
     
     return(
         <div>
-          SALUT
+          <AddFriend></AddFriend>
           <div>
-            {/* {JSON.stringify(messageArray)} */}
             {socketId}
-            {JSON.stringify(conversations)}
+            {/* {JSON.stringify(receivedFriend)} */}
           </div>
         </div>
     )

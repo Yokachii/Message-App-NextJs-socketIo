@@ -1,93 +1,45 @@
-import { useEffect, useRef, useState } from "react";
-import { Chess } from "chess.js";
-import { Chessboard } from "react-chessboard";
-import { useRouter } from "next/router";
-import io from 'Socket.IO-client'
-import Link from "next/link";
-import styles from './styles.module.scss'
-import { useSession } from "next-auth/react";
-import { Button } from "@mantine/core";
-import { createContext } from "react";
+const { useEffect, createContext, useRef } = require("react")
 
-type socket = {
-    socket?:any
-}
+const WebSocketContext = createContext()
 
-export const WebSocketContext = createContext<socket>({})
+function WebSocketProvider({ children, user }) {
+    const ws = useRef(null)
+    const channels = useRef({})
 
-export const WebSocketConponent = ()=>{
-
-    // let session = useSession()
-    // let data = session.data
-    // let user = data?.user
-
-    const socketRef = useRef(null)
-  
-    const socketInitializer = async () => {
-        await fetch('/api/socket');
-        socketRef.current = io();
-        socketRef.current.on('get-room', () => {
-            socketRef.current.emit('set-room',roomid)
-        })
-        socketRef.current.on('room-joined',(data:{id:string,message:string})=>{
-            setSocketId(data.id)
-        })
+    const subscribe = (channel, callback) => {
+        channels.current[channel] = callback
     }
 
-    const fetchRoom = async () => {
-      console.log(`fetched ${user?.email} and ${roomid}`)
-      const response = await fetch('/api/chess/getroom', {
-        method: 'POST',
-        body: JSON.stringify({token:roomid}),
-        headers: {
-            'Content-Type': 'application/json',
-        },
-      });
-
-      const data = await response.json();
-
-      if(data.success){
-
-        setTimeout(() => {
-
-          if(data.room.status==="w"){
-
-            setTimeout(() => {
-              socketRef.current.emit(`join-game-try`,{roomid:roomid,userid:user?.id?user?.id:false})
-            }, 300);
-
-          }else if(data.room.status==="p"){
-
-            // TODO WARNING SET THE PLAYER AS SPEC
-
-            socketRef.current.emit(`join-game-alr-start`,{roomid:roomid,userid:user?.id?user?.id:false})
-
-            setIsPlayingVar(false)
-
-          }
-          
-        }, 400);
-
-        
-        
-
-      }else{
-
-        setIsRoomExist(false)
-
-      }
+    const unsubscribe = (channel) => {
+        delete channels.current[channel]
     }
 
+    useEffect(() => {
+        if (!user) {
+            // if user is absent ws cannot be opened
+            // if ws is open a logout was performed => close ws
+            ws.current?.close()
+            return
+        }
+        ws.current = new WebSocket()
+        ws.current.onopen = () => { console.log('WS open') }
+        ws.current.onclose = () => { console.log('WS close') }
+        ws.current.onmessage = (message) => {
+            const { type, chat, ...data } = JSON.parse(message.data)
+            const chatChannel = `${type}_${chat}`
+            // lookup for a listening (is rendered) chat on message create or delete
+            // if no chat is listening (is rendered) send message into generic channel for push mechanism
+            if (channels.current[chatChannel]) channels.current[chatChannel](data)
+            else channels.current[type]?.(data)
+        }
+        return () => { ws.current.close() }
+    }, [user])
 
-
-    useEffect(()=>{
-        fetchRoom()
-
-        socketInitializer()
-    },[])
-
-    return(
-        <WebSocketContext.Provider value={{socket:""}}></WebSocketContext.Provider>
+    return (
+        <WebSocketContext.Provider value={[subscribe, unsubscribe]}>
+            {children}
+        </WebSocketContext.Provider>
     )
-    
 }
+
+export { WebSocketContext, WebSocketProvider }
