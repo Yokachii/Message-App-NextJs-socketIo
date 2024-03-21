@@ -1,24 +1,3 @@
-Optimisation des state dans les partie
-Permettre au joueur d'ajouter un coup dans l'analyse
-ajouter du style dans la partie room
-Flèche sur room
-Room fin de game ect
-évaluation après partie room
-évalutation de pgn
-échecier d'analyse (nouveau)
-
-TODO :
-> Room
-- Flèche
-- évaluation de partie
-- style
-> Study
-- ajouter des move
-- crée a partir d'un pgn
-> Friend
-- Envoyer des requète de partie
-> Analyse
-- Add stockfish
-- échecier d'analyser
-
-en game waiting faire un écrant d'attente
+Le plus important serais le systeme de sale socket.io
+    - Quand tu te connect au socket il te fais rejoindre une room avec l'id de ton compte ce qui permet de send a tout les gens sur ce compte
+    - Retirée le systeme d'array user
