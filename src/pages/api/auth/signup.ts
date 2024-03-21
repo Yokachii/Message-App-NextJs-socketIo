@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import {Room,User,Study} from '@/module/association'
-import { hashPassword } from '../../../utils/hash';
+import {User} from '@/module/association'
+import {createHash} from 'crypto'
+import {hashPassword} from '@/utils/hash'
 // import type User from '../../../module/type'
 
 export default async function handler(
@@ -31,20 +32,16 @@ export default async function handler(
     // await storeUser.save();
 
     const user = await User.create({
-      firstname:newUser.name,
-      lastname:"test tqt",
-      email:newUser.email,
-      password:newUser.password,
-      activities:JSON.stringify({}),
-      dailytask:JSON.stringify({}),
-      dashboardwidget:JSON.stringify([]),
-      day:JSON.stringify({}),
-      notification:JSON.stringify([]),
-      objective:JSON.stringify({}),
-      song:JSON.stringify([]),
-      todaytask:JSON.stringify({}),
-      widgettask:JSON.stringify([]),
-      links:JSON.stringify([])
+      // firstname:newUser.name,
+      // lastname:"test tqt",
+      // email:newUser.email,
+      // password:newUser.password,
+      firstname: newUser.name,
+      lastname: "not yet",
+      email: newUser.email,
+      password: newUser.password,
+      is_active: false,
+      created_at: new Date().toISOString()
     }).then((x:any) => {
   
       // return NextResponse.json({message:'B'})

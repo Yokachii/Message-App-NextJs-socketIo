@@ -1,4 +1,4 @@
-const { Sequelize, DataTypes, UUID, UUIDV1, json } = require('sequelize');
+const { Sequelize, DataTypes } = require('sequelize');
 import sequelize from '../sequelize'
 
 const User = sequelize.define('users_message', {
@@ -36,11 +36,11 @@ const User = sequelize.define('users_message', {
     timestamps: false,
     tableName: 'users_message',
     name: 'users_message',
-    modelNamel: 'users_message'
+    modelName: 'users_message'
 });
 
 (async () => {
-    await User.sync({force:true});
+    await User.sync({});
 
     console.log('La table "user" a été charger');
 })();

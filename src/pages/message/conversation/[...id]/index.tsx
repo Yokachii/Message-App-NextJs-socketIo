@@ -7,11 +7,11 @@ import styles from './styles.module.scss'
 import { useSession } from "next-auth/react";
 
 type ChatItemType = {
-    name:string;
-    pdp:string;
-    text:string;
-    date:string;
-    id:string;
+  name:string;
+  pdp:string;
+  text:string;
+  date:string;
+  id:string;
 }
 
 export default function Room() {
@@ -25,7 +25,7 @@ export default function Room() {
 
     const [socketId,setSocketId] = useState('')
     const socketRef = useRef(null)
-    const [isRoomExist,setIsRoomExist] = useState(true)
+    const [isRoomExist,setIsRoomExist] = useState(false)
     const [messageArray,setMessageArray] = useState<Array<ChatItemType>>([])
   
     const socketInitializer = async () => {
@@ -100,7 +100,7 @@ export default function Room() {
 
     return (
       <div>
-        This room does not exist, please create a room at : <Link href={`/chess/create`}>Create a room</Link> or join an alreay existing room
+        This conversation does not exist
       </div>
     )
 

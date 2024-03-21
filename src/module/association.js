@@ -6,18 +6,18 @@ import DeletedMessage from './model/deletedmessage';
 import Conversations from './model/conversations';
 
 // Define associations
-User.hasMany(Friendship, { foreignKey: 'user1Id' });
-User.hasMany(Friendship, { foreignKey: 'user2Id' });
+User.hasMany(Friendship, { foreignKey: 'user1Id', as: 'UserFriendships1' });
+User.hasMany(Friendship, { foreignKey: 'user2Id', as: 'UserFriendships2' });
 
-User.hasMany(Messages, { foreignKey: 'sender_id' });
+User.hasMany(Messages, { foreignKey: 'sender_id', as: 'UserMessages' });
 
-Conversations.belongsTo(User, { foreignKey: 'creator' });
+Conversations.belongsTo(User, { foreignKey: 'creator', as: 'ConversationCreator' });
 
-Conversations.hasMany(Messages, { foreignKey: 'conversation_id' });
-Conversations.hasMany(Participants, { foreignKey: 'conversation_id' });
+Conversations.hasMany(Messages, { foreignKey: 'conversation_id', as: 'ConversationMessages' });
+Conversations.hasMany(Participants, { foreignKey: 'conversation_id', as: 'ConversationParticipants' });
 
-User.belongsToMany(Conversations, { through: Participants, foreignKey: 'user_id' });
-Conversations.belongsToMany(User, { through: Participants, foreignKey: 'conversation_id' });
+User.belongsToMany(Conversations, { through: Participants, foreignKey: 'user_id', as: 'UserConversations' });
+Conversations.belongsToMany(User, { through: Participants, foreignKey: 'conversation_id', as: 'ConversationUsers' });
 
 // Export models
 export { User, Friendship, Participants, Messages, DeletedMessage, Conversations };

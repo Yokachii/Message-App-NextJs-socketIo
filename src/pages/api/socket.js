@@ -1,6 +1,6 @@
 import { Server } from 'Socket.IO'
 import { parse } from '@mliebelt/pgn-parser'
-import {Room,User,Study} from '@/module/association'
+import {Conversations,DeletedMessage,Friendship,Messages,Participants,User} from '@/module/association'
 
 const SocketHandler = async (req, res) => {
   if (res.socket.server.io) {
@@ -21,6 +21,29 @@ const SocketHandler = async (req, res) => {
         roomIdLet=roomid
         socket.join(roomid)
         socket.emit('room-joined',{message:"Room joined succesfully",id:socket.id})
+        console.log('HELLO')
+      })
+
+      socket.on('get-conversation', async data => {
+        console.log('|||||||||||||||||||||||||||||||||||||||||||||| fetched')
+        const user = await User.findByPk(data.id, {
+          include: {
+            model: Conversations,
+            as: 'UserConversations', // This should match the alias used in the association definition
+            through: { attributes: [] } // If using a many-to-many association, this ensures only the conversations are loaded without any intermediate data
+          }
+      })
+
+        if(!user) return
+
+        console.log(user)
+        // return
+
+        const conversations = user.dataValues.UserConversations;
+        socket.emit('set-conversation',{conv:conversations})
+
+        // console.log(conversations,user)
+
       })
 
       socket.on('disconnect', async ()=>{

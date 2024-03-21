@@ -1,4 +1,4 @@
-const { Sequelize, DataTypes, UUID, UUIDV4, json } = require('sequelize');
+const { Sequelize, DataTypes } = require('sequelize');
 import sequelize from '../sequelize'
 import User from './user';
 import Messages from './messages'
@@ -14,7 +14,7 @@ const DeletedMessage = sequelize.define('deletedmessage', {
         type: Sequelize.UUID,
         allowNull: false,
         references: {
-            model: User,
+            model: Messages,
             key: 'id'
         }
     },
@@ -22,7 +22,7 @@ const DeletedMessage = sequelize.define('deletedmessage', {
         type: Sequelize.UUID,
         allowNull: false,
         references: {
-            model: Messages,
+            model: User,
             key: 'id'
         }
     },
@@ -35,11 +35,11 @@ const DeletedMessage = sequelize.define('deletedmessage', {
     timestamps: false,
     tableName: 'deletedmessage',
     name: 'deletedmessage',
-    modelNamel: 'deletedmessage'
+    modelName: 'deletedmessage'
 });
 
 (async () => {
-    await DeletedMessage.sync({force:true});
+    await DeletedMessage.sync({});
 
     console.log('La table "deletedMessage" a été charger');
 })();
