@@ -1,29 +1,23 @@
-import Study from './model/study'
-import Room from './model/room'
-import User from './model/user'
-import Friendship from './model/friendship'
+import User from './model/user';
+import Friendship from './model/friendship';
+import Participants from './model/participants';
+import Messages from './model/messages';
+import DeletedMessage from './model/deletedmessage';
+import Conversations from './model/conversations';
 
-Study.belongsTo(User, { as: 'user', foreignKey:`userId` })
-Room.belongsTo(User, { as: 'user', foreignKey:`userId` })
+// Define associations
+User.hasMany(Friendship, { foreignKey: 'user1Id' });
+User.hasMany(Friendship, { foreignKey: 'user2Id' });
 
-User.hasMany(Study, { as: 'studies', foreignKey:`userId` });
-User.hasMany(Room, { as: 'rooms', foreignKey: 'userId' });
+User.hasMany(Messages, { foreignKey: 'sender_id' });
 
-User.belongsToMany(User, {
-    as: 'user1Friends',
-    through: Friendship,
-    foreignKey: 'user1Id',
-    otherKey: 'user2Id'
-});
+Conversations.belongsTo(User, { foreignKey: 'creator' });
 
-User.belongsToMany(User, {
-    as: 'user2Friends',
-    through: Friendship,
-    foreignKey: 'user2Id',
-    otherKey: 'user1Id'
-});
+Conversations.hasMany(Messages, { foreignKey: 'conversation_id' });
+Conversations.hasMany(Participants, { foreignKey: 'conversation_id' });
 
-Friendship.belongsTo(User, { as: 'user1', foreignKey: 'user1Id' });
-Friendship.belongsTo(User, { as: 'user2', foreignKey: 'user2Id' });
+User.belongsToMany(Conversations, { through: Participants, foreignKey: 'user_id' });
+Conversations.belongsToMany(User, { through: Participants, foreignKey: 'conversation_id' });
 
-export {User,Room,Study,Friendship}
+// Export models
+export { User, Friendship, Participants, Messages, DeletedMessage, Conversations };

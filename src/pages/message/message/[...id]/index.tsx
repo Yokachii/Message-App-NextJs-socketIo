@@ -88,7 +88,12 @@ export default function Room() {
   if(isRoomExist){
     
     return(
-        <div>SALUT</div>
+        <div>
+          SALUT
+          <div>
+            {JSON.stringify(messageArray)}
+          </div>
+        </div>
     )
 
   }else{

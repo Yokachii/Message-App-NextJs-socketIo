@@ -37,9 +37,9 @@ const Conversation = sequelize.define('conversation', {
 });
 
 (async () => {
-    await Conversation.sync({});
+    await Conversation.sync({force:true});
 
-    console.log('La table "room" a été charger');
+    console.log('La table "conversation" a été charger');
 })();
 
 export default Conversation

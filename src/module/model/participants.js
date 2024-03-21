@@ -1,7 +1,7 @@
 const { Sequelize, DataTypes, UUID, UUIDV4, json } = require('sequelize');
 import sequelize from '../sequelize'
 import User from './user';
-import Conversation from './conversasion'
+import Conversation from './conversations'
 
 const Participants = sequelize.define('participants', {
     id: {
@@ -34,9 +34,9 @@ const Participants = sequelize.define('participants', {
 });
 
 (async () => {
-    await Participants.sync({});
+    await Participants.sync({force:true});
 
-    console.log('La table "room" a été charger');
+    console.log('La table "participants" a été charger');
 })();
 
 export default Participants

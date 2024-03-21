@@ -24,6 +24,14 @@ const User = sequelize.define('users_message', {
         type: DataTypes.TEXT,
         allowNull: false
     },
+    is_active:{
+        type: DataTypes.BOOLEAN,
+        allowNull:false,
+    },
+    created_at:{
+        type: DataTypes.TEXT,
+        allowNull: false
+    },
 }, {
     timestamps: false,
     tableName: 'users_message',

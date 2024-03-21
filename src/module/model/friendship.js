@@ -33,9 +33,9 @@ const Friendship = sequelize.define('friendships', {
 });
 
 (async () => {
-    await Friendship.sync({});
+    await Friendship.sync({force:true});
 
-    console.log('La table "room" a été charger');
+    console.log('La table "friendship" a été charger');
 })();
 
 export default Friendship
