@@ -58,12 +58,17 @@ const login = (props: propss) => {
         
         if(data.success){
             
-          const id = data.x.sended_to
-          const id2 = data.x.sended_by
-          console.log(id)
-          //@ts-ignore
-          socket.emit('sent-friend', {username:session?.user.username,userId:id,sendedId:id2})
-          console.log('sented func')
+          if(data.type==`accepted`){
+
+            // TODO
+            // socket.emit(`friend-accepted`)
+
+          }else if(data.type==`sent`){
+            const id = data.x.sended_to
+            const id2 = data.x.sended_by
+            //@ts-ignore
+            socket.emit('sent-friend', {username:session?.user.username,userId:id,sendedId:id2})
+          }
             
         }else{
 

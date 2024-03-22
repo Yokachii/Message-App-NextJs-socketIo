@@ -4,7 +4,8 @@ import { useRouter } from "next/router";
 import io from 'Socket.IO-client'
 import Link from "next/link";
 import styles from './styles.module.scss'
-import { useSession } from "next-auth/react";
+import { getSession, useSession } from "next-auth/react";
+import { GetServerSidePropsContext } from "next";
 
 type ChatItemType = {
   name:string;
@@ -17,7 +18,7 @@ type ChatItemType = {
 export default function Room() {
 
     const router = useRouter()
-    const { roomid } = router.query
+    const { id } = router.query
 
     let session = useSession()
     let data = session.data
@@ -48,17 +49,13 @@ export default function Room() {
           });
         })
 
-
-
     }
 
     const fetchRoom = async () => {
-        // Fetch the room
-        console.log(`fetched ${user?.email} and ${roomid}`)
         // Fetch the api
-        const response = await fetch('/api/chess/getMessage', {
+        const response = await fetch('/api/messages/getdm', {
             method: 'POST',
-            body: JSON.stringify({token:roomid}),
+            body: JSON.stringify({userId:user?.id,room:id}),
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -67,6 +64,11 @@ export default function Room() {
       const data = await response.json();
 
       if(data.success){
+
+        const info = data.friendShip
+        console.log(info)
+        setIsRoomExist(true)
+        //SET INFO
 
       }else{
 
@@ -80,9 +82,10 @@ export default function Room() {
     useEffect(()=>{
         if(!router.isReady) return;
 
-        fetchRoom()
-
-        socketInitializer()
+        if(user){
+          fetchRoom()
+          socketInitializer()
+        }
     },[router.isReady,session])
 
   if(isRoomExist){
@@ -105,4 +108,23 @@ export default function Room() {
     )
 
   }
+}
+
+export async function getServerSideProps(context: GetServerSidePropsContext) {
+  const session = await getSession(context);
+
+  if (!session) {
+      return {
+          redirect: {
+              destination: "/login",
+              permanent: false,
+          },
+      };
+  } else {
+    
+  }
+
+  return {
+      props: { session },
+  };
 }

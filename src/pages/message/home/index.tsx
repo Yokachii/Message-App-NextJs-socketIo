@@ -4,21 +4,22 @@ import { useRouter } from "next/router";
 import io from 'Socket.IO-client'
 import Link from "next/link";
 import styles from './styles.module.scss'
-import { useSession } from "next-auth/react";
+import { getSession, useSession } from "next-auth/react";
 import AddFriend from '@/components/core/AddFriendInputBtn/index'
 import { notifications } from "@mantine/notifications";
 import { Button } from "@mantine/core";
 import { ShowNotif } from "@/components/core/Notification/FriendRequest";
 
-type ChatItemType = {
-  name:string;
-  pdp:string;
-  text:string;
-  date:string;
-  id:string;
+type User = {
+  username:string,
+  firstname:string,
+  lastname:string,
+  email:string,
+  id:string,
 }
 
 import { IconCheck } from "@tabler/icons-react";
+import { GetServerSidePropsContext } from "next";
 
 export default function Room() {
 
@@ -33,6 +34,7 @@ export default function Room() {
     const socketRef = useRef(null)
     const [conversations,setConversations] = useState<Array<Record<string,string>>>([])
     const [receivedFriend,setReceivedFriend] = useState([])
+    const [friendsDisplay,setFriendsDisplay] = useState<Array<User>>([])
   
     const socketInitializer = async () => {
 
@@ -41,7 +43,6 @@ export default function Room() {
         socketRef.current = io();
         //@ts-ignore
         socketRef.current.on('set-socket', (data:string) => {
-            console.log('set')
             setSocketId(data)
 
             //@ts-ignore
@@ -74,10 +75,36 @@ export default function Room() {
 
     }
 
+    const fetchData = async () => {
+      const response = await fetch('/api/user/getfriend', {
+            method: 'POST',
+            body: JSON.stringify({id:user?.id}),
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        const data = await response.json();
+        
+        console.log(data)
+        
+        if(data.success){
+
+          const {friends} = data
+          setFriendsDisplay(friends)
+          
+        }
+    }
+
     useEffect(()=>{
         if(!router.isReady) return;
 
-        socketInitializer()
+        if(session&&session?.data?.user){
+
+          socketInitializer()
+          fetchData()
+          
+        }
     },[router.isReady,session])
 
   if(user){
@@ -87,7 +114,10 @@ export default function Room() {
           <AddFriend socket={socketRef.current}></AddFriend>
           <div>
             {socketId}
-            {/* {JSON.stringify(receivedFriend)} */}
+            {/* {JSON.stringify(friendsDisplay)} */}
+            {friendsDisplay.map((item,i)=>(
+              <Link href={`/message/conversation/dm/${item.id}`}><div key={i}>{JSON.stringify(item?.username)}</div></Link>
+            ))}
           </div>
         </div>
     )
@@ -96,9 +126,29 @@ export default function Room() {
 
     return (
       <div>
-        This conversation does not exist
+        Please login
       </div>
     )
 
   }
+}
+
+
+export async function getServerSideProps(context: GetServerSidePropsContext) {
+  const session = await getSession(context);
+
+  if (!session) {
+      return {
+          redirect: {
+              destination: "/login",
+              permanent: false,
+          },
+      };
+  } else {
+    
+  }
+
+  return {
+      props: { session },
+  };
 }

@@ -12,7 +12,7 @@ export default async function handler(
     if(!username||!userId){
         res
             .status(422)
-            .json({ success: false, message: 'An error occured.', user:null });
+            .json({ success: false, type:`error`, message: 'An error occured.', user:null });
         return
     }
 
@@ -24,24 +24,41 @@ export default async function handler(
         if(userId===user2?.dataValues.id){
             res
                 .status(422)
-                .json({ success: false, message: 'Cant add yourself', user:null });
+                .json({ success: false, type:`error`, message: 'Cant add yourself', user:null });
             return
         }
 
         const AllreadyFriendShip = await Friendship.findOne({where:{user1Id:userId,user2Id:user2?.dataValues.id}})
-        if(AllreadyFriendShip){
+        const AllreadyFriendShip2 = await Friendship.findOne({where:{user2Id:userId,user1Id:user2?.dataValues.id}})
+        if(AllreadyFriendShip||AllreadyFriendShip2){
             res
                 .status(422)
-                .json({ success: false, message: 'You are allready friend with this user', user:null });
+                .json({ success: false, type:`error`, message: 'You are allready friend with this user', user:null });
             return
         }
         
         const AllreadyRequest = await FriendRequest.findOne({where:{sended_by:userId,sended_to:user2?.dataValues.id,}})
+        const AllreadyRequest2 = await FriendRequest.findOne({where:{sended_to:userId,sended_by:user2?.dataValues.id,}})
         if(AllreadyRequest){
             res
                 .status(422)
-                .json({ success: false, message: 'Request allready pending', user:null });
+                .json({ success: false, type:`error`, message: 'Request allready pending', user:null });
             return
+        }
+
+        if(AllreadyRequest2){
+            
+            Friendship.create({
+                user1Id: user2.dataValues.id,
+                user2Id: user.dataValues.id,
+            }).then(x=>{
+                AllreadyRequest2.destroy()
+                res
+                    .status(201)
+                    .json({ success: true, message: 'Friend request accepted', type:`accepted`});
+            })
+            return;
+            
         }
 
         FriendRequest.create({
@@ -50,14 +67,14 @@ export default async function handler(
         }).then(x=>{
             res
                 .status(201)
-                .json({ success: true, message: 'Friend request succesfuly sended', x });
+                .json({ success: true, message: 'Friend request succesfuly sended', x, type:`sent` });
         })
 
        
     }else{
         res
             .status(422)
-            .json({ success: false, message: 'User not found', user:null });
+            .json({ success: false, type:`error`, message: 'User not found', user:null });
     }
 
 
@@ -67,6 +84,6 @@ export default async function handler(
   } else {
     res
             .status(422)
-            .json({ success: false, message: 'Error', user:null });
+            .json({ success: false, type:`error`, message: 'Error', user:null });
   }
 }
