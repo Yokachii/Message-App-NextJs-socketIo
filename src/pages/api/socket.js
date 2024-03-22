@@ -1,6 +1,6 @@
 import { Server } from 'Socket.IO'
 import { parse } from '@mliebelt/pgn-parser'
-import {Conversations,DeletedMessage,FriendRequest,Friendship,Messages,Participants,User} from '@/module/association'
+import {Conversations,DeletedMessage,FriendRequest,Friendship,Messages,MessagesDm,Participants,User} from '@/module/association'
 
 const SocketHandler = async (req, res) => {
   if (res.socket.server.io) {
@@ -52,6 +52,33 @@ const SocketHandler = async (req, res) => {
         const Received = user.dataValues.FriendRequestReceiver;
         socket.emit('set-conversation',{conv:Coversation,friendReceived:Received})
 
+      })
+
+      socket.on('message-sent-to-dm', async data => {
+        const {sent_by,sent_to,content} = data
+        const user1 = await User.findByPk(sent_by)
+        let ourFriendShip = await Friendship.findOne({where:{user1Id:sent_by,user2Id:sent_to}})
+        if(!ourFriendShip){
+          ourFriendShip = await Friendship.findOne({where:{user1Id:sent_to,user2Id:sent_by}})
+        }
+        if(!ourFriendShip) return;
+        MessagesDm.create({
+          friendshipId: ourFriendShip.dataValues.id, // ID of the conversation associated with the message
+          sender_id: sent_by, // ID of the user who sent the message
+          message: content, // Content of the message
+          created_at: Date.now().toString()|"19h34 (jsp)" // Current timestamp or any other appropriate value
+        }).then(x=>{
+          const messageItem = {
+            name:user1.dataValues.username,
+            pdp:`https://maville.com/photosmvi/2016/09/27/P1D3055327G.jpg`,
+            text:data.content,
+            date:Date.now().toString()|"19h34 (jsp)",
+            id:x.id,
+          }
+          io.to(`User-room-${sent_to}`).emit(`new-message`,{...data,...{message:messageItem,date:new Date(),username:user1.dataValues.username}})
+          socket.emit(`sended-succes`,messageItem)
+        })
+        
       })
 
       socket.on('sent-friend', async data => {

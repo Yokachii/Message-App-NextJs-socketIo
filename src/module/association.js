@@ -5,6 +5,7 @@ import Messages from './model/messages';
 import DeletedMessage from './model/deletedmessage';
 import Conversations from './model/conversations';
 import FriendRequest from './model/friendrequest'
+import MessagesDm from './model/dmmessage'
 
 // Define associations
 User.belongsToMany(User, {
@@ -18,9 +19,11 @@ User.belongsToMany(User, {
     foreignKey: 'user2Id'
 });
 
-Conversations.hasMany(Messages, { foreignKey: 'conversation_id', as: 'FriendshipMessages' });
+// Conversations.hasMany(Messages, { foreignKey: 'conversation_id', as: 'FriendshipMessages' });
 
 User.hasMany(Messages, { foreignKey: 'sender_id', as: 'UserMessages' });
+User.hasMany(MessagesDm, { foreignKey: 'sender_id', as: 'UserMessagesDm' });
+Friendship.hasMany(MessagesDm, { foreignKey: 'friendshipId', as: 'FriendShipMessages' });
 
 Conversations.belongsTo(User, { foreignKey: 'creator', as: 'ConversationCreator' });
 
@@ -46,4 +49,4 @@ User.belongsToMany(User, {
 
 
 // Export models
-export { FriendRequest, User, Friendship, Participants, Messages, DeletedMessage, Conversations };
+export { MessagesDm,FriendRequest, User, Friendship, Participants, Messages, DeletedMessage, Conversations };

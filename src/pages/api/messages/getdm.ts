@@ -22,7 +22,7 @@ export default async function handler(
             return
         }
 
-        const finalFriendship = await Friendship.findByPk(friendShipUser.dataValues.id, { include: 'FriendshipMessages' })
+        const finalFriendship = await Friendship.findByPk(friendShipUser.dataValues.id, { include: 'FriendShipMessages'  })
         
 
         res

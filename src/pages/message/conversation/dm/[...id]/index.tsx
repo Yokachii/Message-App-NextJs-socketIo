@@ -2,17 +2,25 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import io from 'Socket.IO-client'
-import Link from "next/link";
 import styles from './styles.module.scss'
 import { getSession, useSession } from "next-auth/react";
 import { GetServerSidePropsContext } from "next";
+import { Button } from "@mantine/core";
+import { IconSend } from "@tabler/icons-react";
 
 type ChatItemType = {
   name:string;
   pdp:string;
-  text:string;
+  message:string;
   date:string;
   id:string;
+  sender_id:string;
+}
+
+type NewMess = {
+  message:ChatItemType,
+  username:string,
+  date:any
 }
 
 export default function Room() {
@@ -28,6 +36,7 @@ export default function Room() {
     const socketRef = useRef(null)
     const [isRoomExist,setIsRoomExist] = useState(false)
     const [messageArray,setMessageArray] = useState<Array<ChatItemType>>([])
+    const [inputValue,setInputValue] = useState('')
   
     const socketInitializer = async () => {
 
@@ -40,9 +49,18 @@ export default function Room() {
         })
 
         //@ts-ignore
-        socketRef.current.on('new-message',(data:ChatItemType)=>{
-          if(data.id===socketId) return
-          const {date,name,pdp,text} = data
+        socketRef.current.on('new-message',(data:NewMess)=>{
+          
+          const {message} = data
+          setMessageArray(prevSearchItemArray => {
+            const newSearchItemArray = [...prevSearchItemArray, message];
+            return newSearchItemArray;
+          });
+        })
+
+        //@ts-ignore
+        socketRef.current.on(`sended-succes`,(data:ChatItemType)=>{
+          
           setMessageArray(prevSearchItemArray => {
             const newSearchItemArray = [...prevSearchItemArray, data];
             return newSearchItemArray;
@@ -53,9 +71,9 @@ export default function Room() {
 
     const fetchRoom = async () => {
         // Fetch the api
-        const response = await fetch('/api/messages/getdm', {
+        const response = await fetch('/api/messages/getmessagedm', {
             method: 'POST',
-            body: JSON.stringify({userId:user?.id,room:id}),
+            body: JSON.stringify({id1:user?.id,id2:id}),
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -65,8 +83,9 @@ export default function Room() {
 
       if(data.success){
 
-        const info = data.friendShip
+        const info = data.friendConv
         console.log(info)
+        setMessageArray(info.FriendShipMessages)
         setIsRoomExist(true)
         //SET INFO
 
@@ -94,8 +113,19 @@ export default function Room() {
         <div>
           SALUT
           <div>
-            {JSON.stringify(messageArray)}
+            {/* {JSON.stringify(messageArray)} */}
+            {messageArray.map((item,i)=>(
+              <div className={`${user?.id==item.sender_id?`${styles.message_our}`:`${styles.message_not_our}`}`}>
+                {item.message}
+              </div>
+            ))}
           </div>
+
+          <input onChange={(e)=>{setInputValue(e.target.value)}}></input>
+          <Button leftSection={<IconSend></IconSend>} onClick={()=>{
+            //@ts-ignore
+            socketRef.current.emit(`message-sent-to-dm`,{sent_by:user?.id,sent_to:id,content:inputValue})
+          }}>Send</Button>
         </div>
     )
 
