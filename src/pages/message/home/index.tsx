@@ -114,7 +114,7 @@ export default function Room() {
           <AddFriend socket={socketRef.current}></AddFriend>
           <div>
             {socketId}
-            {/* {JSON.stringify(friendsDisplay)} */}
+            {JSON.stringify(friendsDisplay)}
             {friendsDisplay.map((item,i)=>(
               <Link href={`/message/conversation/dm/${item.id}`}><div key={i}>{JSON.stringify(item?.username)}</div></Link>
             ))}
