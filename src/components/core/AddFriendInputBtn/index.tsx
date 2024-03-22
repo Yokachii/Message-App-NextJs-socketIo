@@ -15,16 +15,19 @@ import ButtonStyled from '../ButtonLoad/index'
 import { useSession, signIn, signOut } from "next-auth/react"
 import { useState } from "react";
 
+type propss = {
+  socket:any,
+}
 
-const login = (props: PaperProps) => {
+const login = (props: propss) => {
   
+  const {socket} = props
     
     const [buttonState,setButtonState] = useState('ready')
     const [message,setMessage] = useState({text:"",state:true})
 
   const { data: session } = useSession()
 
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const form = useForm({
     initialValues: {
       username:"",
@@ -38,7 +41,6 @@ const login = (props: PaperProps) => {
   const handleLogin = async (username:string) => {
 
     setButtonState(`load`)
-    console.log(username)
     if(username){
         const response = await fetch('/api/user/addfriend', {
             method: 'POST',
@@ -56,7 +58,12 @@ const login = (props: PaperProps) => {
         
         if(data.success){
             
-            
+          const id = data.x.sended_to
+          const id2 = data.x.sended_by
+          console.log(id)
+          //@ts-ignore
+          socket.emit('sent-friend', {username:session?.user.username,userId:id,sendedId:id2})
+          console.log('sented func')
             
         }else{
 
@@ -94,7 +101,7 @@ const login = (props: PaperProps) => {
         {!session?.user?(
           <p>non</p>
         ):(
-          <Paper radius="md" p="xl" withBorder {...props}>
+          <Paper radius="md" p="xl" withBorder>
 
           <form onSubmit={form.onSubmit((e) => {handleLogin(e.username)})}>
 

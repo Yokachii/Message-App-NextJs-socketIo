@@ -48,6 +48,13 @@ export default function Room() {
         })
 
         //@ts-ignore
+        socketRef.current.on('friend-received', (data:Record<string,string>) => {
+          console.log(data)
+          notifications.hide(`Friend-Received-${data.sendedId}`)
+          notifications.show({id:`Friend-Received-${data.sendedId}`,title:`New friend request`,message:`You received a friend request from "${data.username}"`})
+        })
+
+        //@ts-ignore
         socketRef.current.on('set-conversation', (data:Record<string,any>) => {
             console.log('a',data)
             setReceivedFriend(data.friendReceived)
@@ -72,7 +79,7 @@ export default function Room() {
     
     return(
         <div>
-          <AddFriend></AddFriend>
+          <AddFriend socket={socketRef.current}></AddFriend>
           <div>
             {socketId}
             {/* {JSON.stringify(receivedFriend)} */}

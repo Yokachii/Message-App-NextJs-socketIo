@@ -92,11 +92,11 @@ export const authOptions = {
     },
 
     async session({ session, token, user }) {
-      const uerss = await User.findOne({where:{email:session.user.email}})
-      if(uerss){
+      const userss = await User.findOne({where:{email:session.user.email}})
+      if(userss){
 
-        session.user.id=uerss.dataValues.id
-        session.user.links=uerss.dataValues.links
+        session.user.id=userss.dataValues.id
+        session.user.username=userss.dataValues.username
 
       }else{
         session.user.id=""

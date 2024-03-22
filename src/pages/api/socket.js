@@ -12,25 +12,11 @@ const SocketHandler = async (req, res) => {
     res.socket.server.io = io
 
     io.on('connection', async (socket) => {
-      let roomIdLet
-
 
       socket.emit('set-socket', socket.id)
       socket.on('set-info',data => {
-        console.log(data)
-        if(data.user){
-          Users.push({id:socket.id,user:true,username:data.user.name,userId:data.user.id})
-        }else{
-          // Users.push({id:socket.id,user:false,username:"",userId:""})
-        }
-      })
-
-
-      socket.on('set-room', roomid => {
-        roomIdLet=roomid
-        socket.join(roomid)
-        socket.emit('room-joined',{message:"Room joined succesfully",id:socket.id})
-        // console.log('HELLO')
+        console.log(`room "User-room-${data.user.id}" joined by ${socket.id}`)
+        socket.join(`User-room-${data.user.id}`)
       })
 
       socket.on('get-conversation', async data => {
@@ -62,42 +48,17 @@ const SocketHandler = async (req, res) => {
 
         if(!user) return
 
-        // console.log(user)
-        // return
-
         const Coversation = user.dataValues.UserConversations;
         const Received = user.dataValues.FriendRequestReceiver;
         socket.emit('set-conversation',{conv:Coversation,friendReceived:Received})
 
-        // console.log(conversations,user)
+      })
 
+      socket.on('sent-friend', async data => {
+        io.to(`User-room-${data.userId}`).emit(`friend-received`,data);
       })
 
       socket.on('disconnect', async ()=>{
-        // if(roomIdLet){
-        //   let usersInRoom = await io.in(roomIdLet).fetchSockets();
-        //   if(usersInRoom.length==0){
-        //     setTimeout(async() => {
-              
-
-        //       let usersInRoom2 = await io.in(roomIdLet).fetchSockets();
-        //       if(usersInRoom2.length==0){
-        //         const room = await Room.findOne({where:{token:roomIdLet}})
-        //         if(room&&room.dataValues){
-                  
-        //           // TODO : arrèter la partie si elle est en cour est donner des résultat
-
-        //           room.destroy();
-        //         }
-        //       }
-
-
-
-        //     }, 30000);
-        //   }
-        // }
-        Users.splice(Users.findIndex(el => el.id === socket.id), 1);
-        console.log(Users)
         console.log(`client ${socket.id} disconnected..... ?${roomIdLet}`)
       })
 
