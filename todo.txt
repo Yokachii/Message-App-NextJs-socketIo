@@ -1,3 +1,2 @@
-Le plus important serais le systeme de sale socket.io
-    - Quand tu te connect au socket il te fais rejoindre une room avec l'id de ton compte ce qui permet de send a tout les gens sur ce compte
-    - Retirée le systeme d'array user
+Accepte avec notification socket
+commencer les conv

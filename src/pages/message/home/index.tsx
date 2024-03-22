@@ -7,6 +7,8 @@ import styles from './styles.module.scss'
 import { useSession } from "next-auth/react";
 import AddFriend from '@/components/core/AddFriendInputBtn/index'
 import { notifications } from "@mantine/notifications";
+import { Button } from "@mantine/core";
+import { ShowNotif } from "@/components/core/Notification/FriendRequest";
 
 type ChatItemType = {
   name:string;
@@ -15,6 +17,8 @@ type ChatItemType = {
   date:string;
   id:string;
 }
+
+import { IconCheck } from "@tabler/icons-react";
 
 export default function Room() {
 
@@ -51,7 +55,8 @@ export default function Room() {
         socketRef.current.on('friend-received', (data:Record<string,string>) => {
           console.log(data)
           notifications.hide(`Friend-Received-${data.sendedId}`)
-          notifications.show({id:`Friend-Received-${data.sendedId}`,title:`New friend request`,message:`You received a friend request from "${data.username}"`})
+          ShowNotif({user,invite:{username:data.username,id:data.userId}})
+          // notifications.show({id:`Friend-Received-${data.sendedId}`,title:`New friend request`,message:`You received a friend request from "${data.username}"`})
         })
 
         //@ts-ignore
@@ -63,7 +68,7 @@ export default function Room() {
             notifications.clean()
             for(let invite of data.friendReceived){
               console.log(invite)
-              notifications.show({title:`New friend request`,message:`You received a friend request from "${invite.username}"`})
+              ShowNotif({user,invite})
             }
         })
 

@@ -59,7 +59,7 @@ const SocketHandler = async (req, res) => {
       })
 
       socket.on('disconnect', async ()=>{
-        console.log(`client ${socket.id} disconnected..... ?${roomIdLet}`)
+        console.log(`client ${socket.id} disconnected.....`)
       })
 
 

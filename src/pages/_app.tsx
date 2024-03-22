@@ -10,8 +10,11 @@ import '@mantine/notifications/styles.css';
 import { SessionProvider, useSession } from "next-auth/react"
 import { Notifications } from "@mantine/notifications";
 import { WebSocketProvider } from "@/context/WebSocket";
+import { getServerSession } from "next-auth";
+import { authOptions } from "./api/auth/[...nextauth]";
 
 const App = ({ Component, pageProps: { session, ...pageProps }, }: any) => {
+  // const sessions = await getServerSession(authOptions)
 
   return (
     <SessionProvider session={session}>
