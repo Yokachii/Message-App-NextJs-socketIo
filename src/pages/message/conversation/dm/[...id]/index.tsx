@@ -9,18 +9,16 @@ import { Button } from "@mantine/core";
 import { IconSend } from "@tabler/icons-react";
 
 type ChatItemType = {
-  name:string;
-  pdp:string;
-  message:string;
-  date:string;
-  id:string;
-  sender_id:string;
+  message:string,
+  sender_id:string,
+  created_at:any,
+  id:string,
 }
 
 type NewMess = {
+  sent_to:string,
+  sent_by:string,
   message:ChatItemType,
-  username:string,
-  date:any
 }
 
 export default function Room() {
@@ -46,26 +44,36 @@ export default function Room() {
         //@ts-ignore
         socketRef.current.on('set-socket', (data:string) => {
             setSocketId(data)
+            //@ts-ignore
+            socketRef.current.emit('set-info', {user})
         })
 
         //@ts-ignore
         socketRef.current.on('new-message',(data:NewMess)=>{
           
-          const {message} = data
-          setMessageArray(prevSearchItemArray => {
-            const newSearchItemArray = [...prevSearchItemArray, message];
-            return newSearchItemArray;
-          });
+          // console.log(data)
+
+          const {sent_to,sent_by,message} = data
+
+          console.log("received")
+
+          let truc = [...messageArray, [message]]
+          console.log([message])
+          console.log(messageArray)
+          console.log(truc)
+          //@ts-ignore
+          setMessageArray(truc);
+          console.log(messageArray)
         })
 
         //@ts-ignore
-        socketRef.current.on(`sended-succes`,(data:ChatItemType)=>{
+        // socketRef.current.on(`sended-succes`,(data:ChatItemType)=>{
           
-          setMessageArray(prevSearchItemArray => {
-            const newSearchItemArray = [...prevSearchItemArray, data];
-            return newSearchItemArray;
-          });
-        })
+        //   setMessageArray(prevSearchItemArray => {
+        //     const newSearchItemArray = [...prevSearchItemArray, data];
+        //     return newSearchItemArray;
+        //   });
+        // })
 
     }
 
@@ -75,7 +83,7 @@ export default function Room() {
             method: 'POST',
             body: JSON.stringify({id1:user?.id,id2:id}),
             headers: {
-                'Content-Type': 'application/json',
+              'Content-Type': 'application/json',
             },
         });
 
@@ -84,7 +92,7 @@ export default function Room() {
       if(data.success){
 
         const info = data.friendConv
-        console.log(info)
+        console.log(info.FriendShipMessages)
         setMessageArray(info.FriendShipMessages)
         setIsRoomExist(true)
         //SET INFO
@@ -94,6 +102,12 @@ export default function Room() {
         setIsRoomExist(false)
 
       }
+    }
+
+    async function sendAMessage(){
+      console.log('send')
+      //@ts-ignore
+      socketRef.current.emit("message-sent-to-dm",{sent_by:user?.id,sent_to:id,content:inputValue})
     }
 
 
@@ -123,8 +137,7 @@ export default function Room() {
 
           <input onChange={(e)=>{setInputValue(e.target.value)}}></input>
           <Button leftSection={<IconSend></IconSend>} onClick={()=>{
-            //@ts-ignore
-            socketRef.current.emit(`message-sent-to-dm`,{sent_by:user?.id,sent_to:id,content:inputValue})
+            sendAMessage()  
           }}>Send</Button>
         </div>
     )

@@ -33,7 +33,14 @@ export default async function handler(
     })
 
     if(user){
-        const friends = [...user?.dataValues.UserFriendships1,user?.dataValues.UserFriendships2]
+        console.log(user)
+        // const friends = [...user?.dataValues.UserFriendships1,user?.dataValues.UserFriendships2]
+        const friends = user?.dataValues.UserFriendships1.concat(user?.dataValues.UserFriendships2)
+
+        // console.log('aaaaaaaaaaaa')
+        // console.log(friends)
+        // console.log(friends2)
+        // console.log('aaaaaaaaaaaa')
         // for(let friend of friends){
         //     console.log('||||||||||||')
         //     console.log(friend)

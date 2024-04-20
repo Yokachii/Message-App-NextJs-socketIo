@@ -86,11 +86,10 @@ export default function Room() {
 
         const data = await response.json();
         
-        console.log(data)
-        
         if(data.success){
 
           const {friends} = data
+          console.log(friends)
           setFriendsDisplay(friends)
           
         }
@@ -113,7 +112,7 @@ export default function Room() {
         <div>
           <AddFriend socket={socketRef.current}></AddFriend>
           <div>
-            {socketId}
+            {friendsDisplay.length}
             {JSON.stringify(friendsDisplay)}
             {friendsDisplay.map((item,i)=>(
               <Link href={`/message/conversation/dm/${item.id}`}><div key={i}>{JSON.stringify(item?.username)}</div></Link>

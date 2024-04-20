@@ -14,8 +14,11 @@ const SocketHandler = async (req, res) => {
     io.on('connection', async (socket) => {
 
       socket.emit('set-socket', socket.id)
+
       socket.on('set-info',data => {
         console.log(`room "User-room-${data.user.id}" joined by ${socket.id}`)
+        socket.userId = data.user.id
+        // console.log('joined : '+`User-room-${data.user.id}`)
         socket.join(`User-room-${data.user.id}`)
       })
 
@@ -55,7 +58,10 @@ const SocketHandler = async (req, res) => {
       })
 
       socket.on('message-sent-to-dm', async data => {
-        const {sent_by,sent_to,content} = data
+        console.log('SALUT FROM SOCKET')
+        console.log(`User-room-${data.sent_to}`)
+        const {sent_to,content,sent_by} = data
+        
         const user1 = await User.findByPk(sent_by)
         let ourFriendShip = await Friendship.findOne({where:{user1Id:sent_by,user2Id:sent_to}})
         if(!ourFriendShip){
@@ -69,14 +75,16 @@ const SocketHandler = async (req, res) => {
           created_at: Date.now().toString()|"19h34 (jsp)" // Current timestamp or any other appropriate value
         }).then(x=>{
           const messageItem = {
-            name:user1.dataValues.username,
+            sender_id:sent_by,
             pdp:`https://maville.com/photosmvi/2016/09/27/P1D3055327G.jpg`,
-            text:data.content,
-            date:Date.now().toString()|"19h34 (jsp)",
+            message:content,
+            created_at:Date.now().toString()|"19h34 (jsp)",
             id:x.id,
           }
-          io.to(`User-room-${sent_to}`).emit(`new-message`,{...data,...{message:messageItem,date:new Date(),username:user1.dataValues.username}})
-          socket.emit(`sended-succes`,messageItem)
+          const newData = {sent_to,sent_by,message:messageItem}
+          io.to(`User-room-${data.sent_to}`).emit(`new-message`,newData)
+          // io.to(`User-room-${sent_to}`).emit(`new-message`,{...data,...{message:messageItem,date:new Date(),username:user1.dataValues.username}})
+          // socket.emit(`sended-succes`,messageItem)
         })
         
       })

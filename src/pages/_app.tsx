@@ -9,9 +9,11 @@ import '@mantine/notifications/styles.css';
 
 import { SessionProvider, useSession } from "next-auth/react"
 import { Notifications } from "@mantine/notifications";
-import { WebSocketProvider } from "@/context/WebSocket";
 import { getServerSession } from "next-auth";
+// import SocketContextt from "@/providers/SocketIoProvider";
 import { authOptions } from "./api/auth/[...nextauth]";
+
+// import { TestWrapper } from '@/context/test/main'
 
 const App = ({ Component, pageProps: { session, ...pageProps }, }: any) => {
   // const sessions = await getServerSession(authOptions)
@@ -20,7 +22,8 @@ const App = ({ Component, pageProps: { session, ...pageProps }, }: any) => {
     <SessionProvider session={session}>
       <MantineProvider theme={theme}>
         <Notifications />
-        {/* <WebSocketProvider user={session}> */}
+        
+        {/* <TestWrapper> */}
 
           <Head>
             <title>Oxie</title>
@@ -33,8 +36,9 @@ const App = ({ Component, pageProps: { session, ...pageProps }, }: any) => {
           <Navbar />
           <Component {...pageProps} />
           <Footer />
+          
+        {/* </TestWrapper> */}
 
-        {/* </WebSocketProvider> */}
       </MantineProvider>
     </SessionProvider>
   );
