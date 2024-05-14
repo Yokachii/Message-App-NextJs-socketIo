@@ -1,7 +1,7 @@
 const { Sequelize, DataTypes } = require('sequelize');
 import sequelize from '../sequelize'
 import User from './user';
-import Messages from './messages'
+import DmMessage from './dmmessage'
 
 const DeletedMessage = sequelize.define('deletedmessage', {
     id: {
@@ -14,7 +14,7 @@ const DeletedMessage = sequelize.define('deletedmessage', {
         type: Sequelize.UUID,
         allowNull: false,
         references: {
-            model: Messages,
+            model: DmMessage,
             key: 'id'
         }
     },
@@ -42,7 +42,7 @@ const DeletedMessage = sequelize.define('deletedmessage', {
 });
 
 (async () => {
-    await DeletedMessage.sync({});
+    await DeletedMessage.sync({force:true});
 
     console.log('La table "deletedMessage" a été charger');
 })();

@@ -6,6 +6,7 @@ import DeletedMessage from './model/deletedmessage';
 import Conversations from './model/conversations';
 import FriendRequest from './model/friendrequest'
 import MessagesDm from './model/dmmessage'
+import DeletedMessagesDm from './model/deletedmessagedm'
 
 // Define associations
 User.belongsToMany(User, {
@@ -49,4 +50,4 @@ User.belongsToMany(User, {
 
 
 // Export models
-export { MessagesDm,FriendRequest, User, Friendship, Participants, Messages, DeletedMessage, Conversations };
+export { MessagesDm,FriendRequest, User, Friendship, Participants, Messages, DeletedMessagesDm, DeletedMessage, Conversations };

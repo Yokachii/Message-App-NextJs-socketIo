@@ -35,6 +35,10 @@ const MessagesDm = sequelize.define('dm_messages', {
         type: DataTypes.TEXT,
         allowNull: false
     },
+    status:{
+        type: DataTypes.TEXT,
+        allowNull:false
+    }
 }, {
     timestamps: false,
     tableName: 'dm_messages',

@@ -33,8 +33,19 @@ export default function Room() {
     const [socketId,setSocketId] = useState('')
     const socketRef = useRef(null)
     const [isRoomExist,setIsRoomExist] = useState(false)
-    const [messageArray,setMessageArray] = useState<Array<ChatItemType>>([])
+    const [MessageObj,setMessageObj] = useState<Record<string,ChatItemType>>({})
     const [inputValue,setInputValue] = useState('')
+
+    const sortByTimestamp = (obj:Record<string,ChatItemType>) => {
+      let xTmp = []
+      for (let item in obj){
+        xTmp.push([item,obj[item].created_at,obj[item]])
+      }
+      xTmp.sort(function(a, b) {
+        return a[1] - b[1];
+      });
+      return xTmp.map(x=>{return x[2]})
+    }
   
     const socketInitializer = async () => {
 
@@ -57,19 +68,17 @@ export default function Room() {
 
           console.log("received")
 
-          let truc = [...messageArray, [message]]
-          console.log([message])
-          console.log(messageArray)
-          console.log(truc)
-          //@ts-ignore
-          setMessageArray(truc);
-          console.log(messageArray)
+          let newObj = MessageObj
+          newObj[message.id] = message
+
+          setMessageObj(newObj);
+          console.log(MessageObj)
         })
 
         //@ts-ignore
         // socketRef.current.on(`sended-succes`,(data:ChatItemType)=>{
           
-        //   setMessageArray(prevSearchItemArray => {
+        //   setMessageObj(prevSearchItemArray => {
         //     const newSearchItemArray = [...prevSearchItemArray, data];
         //     return newSearchItemArray;
         //   });
@@ -92,8 +101,18 @@ export default function Room() {
       if(data.success){
 
         const info = data.friendConv
-        console.log(info.FriendShipMessages)
-        setMessageArray(info.FriendShipMessages)
+
+        // console.log(info.FriendShipMessages)
+
+        let newMsgObj = info.FriendShipMessages.reduce(function(result:any, item:any, index:any, array:any) {
+          result[item.id] = item;
+          return result;
+        }, {})
+
+        console.log(newMsgObj)
+
+        setMessageObj(newMsgObj)
+
         setIsRoomExist(true)
         //SET INFO
 
@@ -122,17 +141,44 @@ export default function Room() {
     },[router.isReady,session])
 
   if(isRoomExist){
+    const sortedMessage = sortByTimestamp(MessageObj)
+
+    console.log(sortedMessage)
     
     return(
         <div>
           SALUT
           <div>
-            {/* {JSON.stringify(messageArray)} */}
-            {messageArray.map((item,i)=>(
-              <div className={`${user?.id==item.sender_id?`${styles.message_our}`:`${styles.message_not_our}`}`}>
-                {item.message}
+            {/* {JSON.stringify(MessageObj)} */}
+            {sortedMessage.map((item,i)=>(
+              <div className={`${styles.msg} ${user?.id==item.sender_id?`${styles.message_our}`:`${styles.message_not_our}`}`}>
+                {item.message} <Button onClick={async ()=>{
+                  const response = await fetch('/api/messages/delete', {
+                      method: 'POST',
+                      body: JSON.stringify({id:item.id}),
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                  });
+
+                const data = await response.json();
+
+                if(data.success){
+                  let newMsgObj = MessageObj
+                  console.log(newMsgObj[item.id])
+                  delete newMsgObj[item.id]
+                  console.log(newMsgObj[item.id])
+                  newMsgObj.cow = {id:'a'}
+                  console.log(newMsgObj,item.id)
+                  setMessageObj(newMsgObj) // WARNING TRUC QUI BUG setMessageObj({}) ça change mais si je set avec l'object ça change pas
+                }
+
+                // console.log(data)
+                }}>Delete!</Button>
               </div>
             ))}
+
+            
           </div>
 
           <input onChange={(e)=>{setInputValue(e.target.value)}}></input>

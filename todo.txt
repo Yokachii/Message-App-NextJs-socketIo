@@ -1,2 +1,6 @@
 Message en live
 Lien dans le menu
+
+Généralisée le socket
+Status Message
+Live Message
