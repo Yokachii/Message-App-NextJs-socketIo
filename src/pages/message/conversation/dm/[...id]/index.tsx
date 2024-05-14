@@ -120,16 +120,16 @@ export default function Room() {
           console.log("received")
 
           let newObj = messageInstance.getMessagesArray
-          newObj.push(message)
-          setMessageInstance(new stockMessages(newObj))
+          
+          setMessageInstance(new stockMessages([...newObj,...[message]]))
           console.log(messageInstance.getMessagesObject)
         })
 
         //@ts-ignore
         socketRef.current.on(`sended-succes`,(data:ChatItemType)=>{
           let newObj = messageInstance.getMessagesArray
-          newObj.push(data)
-          setMessageInstance(new stockMessages(newObj))
+          
+          setMessageInstance(new stockMessages([...newObj,...[data]]))
           console.log(messageInstance.getMessagesObject)
         })
 
