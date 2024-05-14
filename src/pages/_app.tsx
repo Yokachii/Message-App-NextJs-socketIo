@@ -13,7 +13,7 @@ import { getServerSession } from "next-auth";
 // import SocketContextt from "@/providers/SocketIoProvider";
 import { authOptions } from "./api/auth/[...nextauth]";
 
-// import { TestWrapper } from '@/context/test/main'
+import { TestWrapper } from '@/context/test/main'
 
 const App = ({ Component, pageProps: { session, ...pageProps }, }: any) => {
   // const sessions = await getServerSession(authOptions)
@@ -23,7 +23,7 @@ const App = ({ Component, pageProps: { session, ...pageProps }, }: any) => {
       <MantineProvider theme={theme}>
         <Notifications />
         
-        {/* <TestWrapper> */}
+        <TestWrapper>
 
           <Head>
             <title>Oxie</title>
@@ -37,7 +37,7 @@ const App = ({ Component, pageProps: { session, ...pageProps }, }: any) => {
           <Component {...pageProps} />
           <Footer />
           
-        {/* </TestWrapper> */}
+        </TestWrapper>
 
       </MantineProvider>
     </SessionProvider>

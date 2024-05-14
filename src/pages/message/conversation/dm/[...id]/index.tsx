@@ -21,6 +21,56 @@ type NewMess = {
   message:ChatItemType,
 }
 
+class stockMessages {
+  messageArray : Array<ChatItemType>;
+
+  constructor(messagesArray:Array<ChatItemType>) {
+    this.messageArray = messagesArray
+  }
+
+  get getMessagesArray() {
+    return this.messageArray
+  }
+
+  get getMessagesObject() {
+    return this.messagesObject()
+  }
+
+  get getLastMessage() {
+    return this.lastMessage()
+  }
+
+  get getSortedMessageArray() {
+    return this.sortedArray()
+  }
+
+  messagesObject() {
+    let newMsgObj = this.messageArray.reduce(function(result:any, item:any, index:any, array:any) {
+      result[item.id] = item;
+      return result;
+    }, {})
+    return newMsgObj
+  }
+
+  sortedArray() {
+    let xTmp = []
+    for (let item in this.messageArray){
+      xTmp.push([item,this.messageArray[item].created_at,this.messageArray[item]])
+    }
+    xTmp.sort(function(a, b) {
+      return a[1] - b[1];
+    });
+    return xTmp.map(x=>{return x[2]})
+  }
+
+  lastMessage() {
+    let sorted = this.sortedArray()
+    let lastMessage = sorted[sorted.length-1]
+    return lastMessage
+  }
+
+}
+
 export default function Room() {
 
     const router = useRouter()
@@ -33,8 +83,9 @@ export default function Room() {
     const [socketId,setSocketId] = useState('')
     const socketRef = useRef(null)
     const [isRoomExist,setIsRoomExist] = useState(false)
-    const [MessageObj,setMessageObj] = useState<Record<string,ChatItemType>>({})
     const [inputValue,setInputValue] = useState('')
+    
+    const [messageInstance,setMessageInstance] = useState<stockMessages>(new stockMessages([]))
 
     const sortByTimestamp = (obj:Record<string,ChatItemType>) => {
       let xTmp = []
@@ -68,31 +119,19 @@ export default function Room() {
 
           console.log("received")
 
-          let newObj = MessageObj
-          console.log(newObj,MessageObj)
-          newObj[message.id] = message
-          console.log(newObj)
-
-          setMessageObj(newObj);
-          console.log(MessageObj)
-        })
-
-        socketRef.current.on('tryb',(data:any)=>{
-          console.log('sasa')
-        })
-
-        socketRef.current.on('tryc',(data:any)=>{
-          console.log('sasa2')
+          let newObj = messageInstance.getMessagesArray
+          newObj.push(message)
+          setMessageInstance(new stockMessages(newObj))
+          console.log(messageInstance.getMessagesObject)
         })
 
         //@ts-ignore
-        // socketRef.current.on(`sended-succes`,(data:ChatItemType)=>{
-          
-        //   setMessageObj(prevSearchItemArray => {
-        //     const newSearchItemArray = [...prevSearchItemArray, data];
-        //     return newSearchItemArray;
-        //   });
-        // })
+        socketRef.current.on(`sended-succes`,(data:ChatItemType)=>{
+          let newObj = messageInstance.getMessagesArray
+          newObj.push(data)
+          setMessageInstance(new stockMessages(newObj))
+          console.log(messageInstance.getMessagesObject)
+        })
 
     }
 
@@ -110,20 +149,18 @@ export default function Room() {
 
       if(data.success){
 
-        const info = data.friendConv
+        // const info = data.friendConv
         let messagesArray = data.messagesArray
+        setMessageInstance(new stockMessages(messagesArray))
 
         // console.log(info.FriendShipMessages)
 
-        let newMsgObj = messagesArray.reduce(function(result:any, item:any, index:any, array:any) {
-          result[item.id] = item;
-          return result;
-        }, {})
+        // let newMsgObj = messagesArray.reduce(function(result:any, item:any, index:any, array:any) {
+        //   result[item.id] = item;
+        //   return result;
+        // }, {})
 
-        // console.log(newMsgObj)
-        console.log(data)
-
-        setMessageObj(newMsgObj)
+        // setMessagesArray(newMsgObj)
 
         setIsRoomExist(true)
         //SET INFO
@@ -160,9 +197,11 @@ export default function Room() {
     },[router.isReady,session])
 
   if(isRoomExist){
-    const sortedMessage = sortByTimestamp(MessageObj)
 
-    console.log(sortedMessage)
+    console.log(messageInstance.getSortedMessageArray)
+
+    console.log(messageInstance.getSortedMessageArray[messageInstance.getSortedMessageArray.length-1])
+    console.log('aaaaaa')
     
     return(
         <div>
@@ -173,7 +212,7 @@ export default function Room() {
           }}>test</Button>
           <div>
             {/* {JSON.stringify(MessageObj)} */}
-            {sortedMessage.map((item,i)=>(
+            {messageInstance.getSortedMessageArray.map((item,i)=>(
               <div className={`${styles.msg} ${user?.id==item.sender_id?`${styles.message_our}`:`${styles.message_not_our}`}`}>
                 {item.message} <Button onClick={async ()=>{
                   const response = await fetch('/api/messages/delete', {
@@ -187,13 +226,19 @@ export default function Room() {
                 const data = await response.json();
 
                 if(data.success){
-                  let newMsgObj = MessageObj
-                  console.log(newMsgObj[item.id])
-                  delete newMsgObj[item.id]
-                  console.log(newMsgObj[item.id])
-                  newMsgObj.cow = {id:'a'}
-                  console.log(newMsgObj,item.id)
-                  setMessageObj(newMsgObj) // WARNING TRUC QUI BUG setMessageObj({}) ça change mais si je set avec l'object ça change pas
+
+                  let newObj = messageInstance.getMessagesObject
+                  delete newObj[item.id]
+                  let newArray = Object.values(newObj)
+                  // @ts-ignore
+                  setMessageInstance(new stockMessages(newArray))
+                  console.log(messageInstance.getMessagesObject)
+                  // let newMsgObj = MessageObj
+                  // console.log(newMsgObj[item.id])
+                  // delete newMsgObj[item.id]
+                  // console.log(newMsgObj[item.id])
+                  // console.log(newMsgObj,item.id)
+                  // setMessagesArray(newMsgObj) // WARNING TRUC QUI BUG setMessageObj({}) ça change mais si je set avec l'object ça change pas
                 }
 
                 // console.log(data)
@@ -206,7 +251,7 @@ export default function Room() {
 
           <input onChange={(e)=>{setInputValue(e.target.value)}}></input>
           <Button leftSection={<IconSend></IconSend>} onClick={()=>{
-            sendAMessage()  
+            sendAMessage()
           }}>Send</Button>
         </div>
     )

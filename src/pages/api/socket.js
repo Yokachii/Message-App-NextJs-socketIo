@@ -88,16 +88,10 @@ const SocketHandler = async (req, res) => {
           }
           const newData = {sent_to,sent_by,message:messageItem}
           io.to(`User-room-${data.sent_to}`).emit(`new-message`,newData)
+          io.to(`User-room-${sent_by}`).emit(`sended-succes`,messageItem)
           // io.to(`User-room-${sent_to}`).emit(`new-message`,{...data,...{message:messageItem,date:new Date(),username:user1.dataValues.username}})
-          // socket.emit(`sended-succes`,messageItem)
         })
         
-      })
-
-      socket.on('trya', async (data) => {
-        console.log('tryedA'+`User-room-${data.id}`)
-        socket.emit('tryc')
-        io.to(`User-room-${data.id}`).emit(`tryb`,"hey")
       })
 
       socket.on('sent-friend', async data => {
