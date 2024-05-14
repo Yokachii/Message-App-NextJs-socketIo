@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
+  // reactStrictMode: true,
+  reactStrictMode: false,
   swcMinify: true,
   sassOptions: {
     prependData: `@import "./_mantine.scss";`,

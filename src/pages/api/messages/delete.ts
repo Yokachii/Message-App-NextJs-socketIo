@@ -17,8 +17,11 @@ export default async function handler(
         console.log(message)
 
         DeletedMessagesDm.create({
+            //@ts-ignore
             message_id:message.id,
+            //@ts-ignore
             user_id:message.sender_id,
+            //@ts-ignore
             message:message.message,
             deleted_at:Date.now().toString(),
         }).then(x2=>{

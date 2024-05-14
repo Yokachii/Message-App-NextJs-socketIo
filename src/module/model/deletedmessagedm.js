@@ -3,7 +3,7 @@ import sequelize from '../sequelize'
 import User from './user';
 import DmMessage from './dmmessage'
 
-const DeletedMessage = sequelize.define('deletedmessage', {
+const DeletedMessageDm = sequelize.define('deletedmessagedm', {
     id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
@@ -36,15 +36,15 @@ const DeletedMessage = sequelize.define('deletedmessage', {
     },
 }, {
     timestamps: false,
-    tableName: 'deletedmessage',
-    name: 'deletedmessage',
-    modelName: 'deletedmessage'
+    tableName: 'deletedmessagedm',
+    name: 'deletedmessagedm',
+    modelName: 'deletedmessagedm'
 });
 
 (async () => {
-    await DeletedMessage.sync({force:true});
+    await DeletedMessageDm.sync({});
 
-    console.log('La table "deletedMessage" a été charger');
+    console.log('La table "deletedmessagedm" a été charger');
 })();
 
-export default DeletedMessage
+export default DeletedMessageDm

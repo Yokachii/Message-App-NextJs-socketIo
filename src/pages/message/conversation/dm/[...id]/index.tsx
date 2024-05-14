@@ -69,10 +69,20 @@ export default function Room() {
           console.log("received")
 
           let newObj = MessageObj
+          console.log(newObj,MessageObj)
           newObj[message.id] = message
+          console.log(newObj)
 
           setMessageObj(newObj);
           console.log(MessageObj)
+        })
+
+        socketRef.current.on('tryb',(data:any)=>{
+          console.log('sasa')
+        })
+
+        socketRef.current.on('tryc',(data:any)=>{
+          console.log('sasa2')
         })
 
         //@ts-ignore
@@ -90,7 +100,7 @@ export default function Room() {
         // Fetch the api
         const response = await fetch('/api/messages/getmessagedm', {
             method: 'POST',
-            body: JSON.stringify({id1:user?.id,id2:id}),
+            body: JSON.stringify({id1:user?.id,id2:id,from:0,to:10}),
             headers: {
               'Content-Type': 'application/json',
             },
@@ -101,15 +111,17 @@ export default function Room() {
       if(data.success){
 
         const info = data.friendConv
+        let messagesArray = data.messagesArray
 
         // console.log(info.FriendShipMessages)
 
-        let newMsgObj = info.FriendShipMessages.reduce(function(result:any, item:any, index:any, array:any) {
+        let newMsgObj = messagesArray.reduce(function(result:any, item:any, index:any, array:any) {
           result[item.id] = item;
           return result;
         }, {})
 
-        console.log(newMsgObj)
+        // console.log(newMsgObj)
+        console.log(data)
 
         setMessageObj(newMsgObj)
 
@@ -129,12 +141,19 @@ export default function Room() {
       socketRef.current.emit("message-sent-to-dm",{sent_by:user?.id,sent_to:id,content:inputValue})
     }
 
+    function testTmp(){
+      //@ts-ignore
+      socketRef.current.emit('trya',{id:id})
+      console.log('test2')
+    }
+
 
 
     useEffect(()=>{
         if(!router.isReady) return;
 
         if(user){
+          console.log('aa')
           fetchRoom()
           socketInitializer()
         }
@@ -148,6 +167,10 @@ export default function Room() {
     return(
         <div>
           SALUT
+          <Button onClick={()=>{
+            testTmp()
+            console.log('test')
+          }}>test</Button>
           <div>
             {/* {JSON.stringify(MessageObj)} */}
             {sortedMessage.map((item,i)=>(
