@@ -21,56 +21,6 @@ type NewMess = {
   message:ChatItemType,
 }
 
-class stockMessages {
-  messageArray : Array<ChatItemType>;
-
-  constructor(messagesArray:Array<ChatItemType>) {
-    this.messageArray = messagesArray
-  }
-
-  get getMessagesArray() {
-    return this.messageArray
-  }
-
-  get getMessagesObject() {
-    return this.messagesObject()
-  }
-
-  get getLastMessage() {
-    return this.lastMessage()
-  }
-
-  get getSortedMessageArray() {
-    return this.sortedArray()
-  }
-
-  messagesObject() {
-    let newMsgObj = this.messageArray.reduce(function(result:any, item:any, index:any, array:any) {
-      result[item.id] = item;
-      return result;
-    }, {})
-    return newMsgObj
-  }
-
-  sortedArray() {
-    let xTmp = []
-    for (let item in this.messageArray){
-      xTmp.push([item,this.messageArray[item].created_at,this.messageArray[item]])
-    }
-    xTmp.sort(function(a, b) {
-      return a[1] - b[1];
-    });
-    return xTmp.map(x=>{return x[2]})
-  }
-
-  lastMessage() {
-    let sorted = this.sortedArray()
-    let lastMessage = sorted[sorted.length-1]
-    return lastMessage
-  }
-
-}
-
 export default function Room() {
 
     const router = useRouter()
@@ -85,7 +35,39 @@ export default function Room() {
     const [isRoomExist,setIsRoomExist] = useState(false)
     const [inputValue,setInputValue] = useState('')
     
-    const [messageInstance,setMessageInstance] = useState<stockMessages>(new stockMessages([]))
+    // const [messageInstance,setMessageInstance] = useState<stockMessages>(new stockMessages([]))
+    const [messagesArray,setMessagesArray] = useState<Array<ChatItemType>>([])
+
+    const addMessage = (mess:ChatItemType) => {
+      const updatedMessages = [
+        ...messagesArray,
+        mess,
+      ];
+      setMessagesArray(updatedMessages);
+    }
+
+    const removeMessage = (mess:ChatItemType) => {
+      console.log('a')
+      let tmpIndex = messagesArray.findIndex(x => x.id ===mess.id);
+      console.log(tmpIndex,messagesArray,mess.id)
+      if(tmpIndex > -1) {
+        let newMesageArray = messagesArray
+
+        newMesageArray.splice(tmpIndex, 1);
+        setMessagesArray(newMesageArray)
+      }
+    }
+
+    const sortArray = (tab:Array<ChatItemType>) => {
+      let xTmp = []
+      for (let item in tab){
+        xTmp.push([item,tab[item].created_at,tab[item]])
+      }
+      xTmp.sort(function(a, b) {
+        return a[1] - b[1];
+      });
+      return xTmp.map(x=>{return x[2]})
+    }
   
     const socketInitializer = async () => {
 
@@ -105,19 +87,23 @@ export default function Room() {
           const {sent_to,sent_by,message} = data
           
           console.log('set message instance (new mess)')
-          setMessageInstance(new stockMessages([...messageInstance.getMessagesArray,...[message]]))
+          addMessage(message)
+          // setMessageInstance(new stockMessages([...messageInstance.getMessagesArray,...[message]]))
         })
 
         //@ts-ignore
         socketRef.current.on(`sended-succes`,(data:ChatItemType)=>{
-          let newObj = messageInstance.getMessagesArray
+
+          addMessage(data)
+
+          // let newObj = messageInstance.getMessagesArray
           
-          console.log('&&&&&&&&&&&&&&&&&&&&&&&')
-          console.log(messageInstance.getMessagesArray,newObj)
-          console.log('set message instance (sended succes)')
-          setMessageInstance(new stockMessages([...messageInstance.getMessagesArray,...[data]]))
-          console.log(messageInstance.getMessagesArray)
-          console.log('&&&&&&&&&&&&&&&&&&&&&&&')
+          // console.log('&&&&&&&&&&&&&&&&&&&&&&&')
+          // console.log(messageInstance.getMessagesArray,newObj)
+          // console.log('set message instance (sended succes)')
+          // setMessageInstance(new stockMessages([...messageInstance.getMessagesArray,...[data]]))
+          // console.log(messageInstance.getMessagesArray)
+          // console.log('&&&&&&&&&&&&&&&&&&&&&&&')
         })
 
     }
@@ -137,18 +123,10 @@ export default function Room() {
       if(data.success){
 
         // const info = data.friendConv
-        let messagesArray = data.messagesArray
+        let arrayTmp = data.messagesArray
         console.log('set message instance (geted)')
-        setMessageInstance(new stockMessages(messagesArray))
-
-        // console.log(info.FriendShipMessages)
-
-        // let newMsgObj = messagesArray.reduce(function(result:any, item:any, index:any, array:any) {
-        //   result[item.id] = item;
-        //   return result;
-        // }, {})
-
-        // setMessagesArray(newMsgObj)
+        // setMessageInstance(new stockMessages(messagesArray))
+        setMessagesArray(arrayTmp)
 
         setIsRoomExist(true)
         //SET INFO
@@ -164,7 +142,7 @@ export default function Room() {
       console.log('send')
       //@ts-ignore
       socketRef.current.emit("message-sent-to-dm",{sent_by:user?.id,sent_to:id,content:inputValue})
-      console.log(messageInstance.getMessagesArray)
+      console.log(messagesArray)
     }
 
 
@@ -185,7 +163,7 @@ export default function Room() {
           SALUT
           <div className={styles.message_container}>
             {/* {JSON.stringify(MessageObj)} */}
-            {messageInstance.getSortedMessageArray.map((item,i)=>(
+            {sortArray(messagesArray).map((item,i)=>(
               <div className={`${styles.msg} ${user?.id==item.sender_id?`${styles.message_our}`:`${styles.message_not_our}`}`}>
                 <span>{item.message}</span>
                 <button className={styles.dlt} onClick={async ()=>{
@@ -201,12 +179,14 @@ export default function Room() {
 
                 if(data.success){
 
-                  let newObj = messageInstance.getMessagesObject
-                  delete newObj[item.id]
-                  let newArray = Object.values(newObj)
-                  // @ts-ignore
-                  console.log('set message instance (delted)')
-                  setMessageInstance(new stockMessages(newArray))
+                  removeMessage(item)
+
+                  // let newObj = messageInstance.getMessagesObject
+                  // delete newObj[item.id]
+                  // let newArray = Object.values(newObj)
+                  // // @ts-ignore
+                  // console.log('set message instance (delted)')
+                  // setMessageInstance(new stockMessages(newArray))
                 }
 
                 // console.log(data)
@@ -215,7 +195,7 @@ export default function Room() {
             ))}
 
             <div className={styles.status}>
-                {messageInstance.getLastMessage.status}
+                {sortArray(messagesArray)[messagesArray.length-1].status}
             </div>
 
             
