@@ -83,10 +83,11 @@ const SocketHandler = async (req, res) => {
             pdp:`https://maville.com/photosmvi/2016/09/27/P1D3055327G.jpg`,
             message:content,
             created_at:Date.now().toString()|"19h34 (jsp)",
-            status:"sended",
+            status:"distribut",
             id:x.id,
           }
           const newData = {sent_to,sent_by,message:messageItem}
+          x.update({status:"distribut"})
           io.to(`User-room-${data.sent_to}`).emit(`new-message`,newData)
           io.to(`User-room-${sent_by}`).emit(`sended-succes`,messageItem)
           // io.to(`User-room-${sent_to}`).emit(`new-message`,{...data,...{message:messageItem,date:new Date(),username:user1.dataValues.username}})

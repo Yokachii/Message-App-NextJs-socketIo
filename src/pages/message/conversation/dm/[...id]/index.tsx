@@ -86,17 +86,6 @@ export default function Room() {
     const [inputValue,setInputValue] = useState('')
     
     const [messageInstance,setMessageInstance] = useState<stockMessages>(new stockMessages([]))
-
-    const sortByTimestamp = (obj:Record<string,ChatItemType>) => {
-      let xTmp = []
-      for (let item in obj){
-        xTmp.push([item,obj[item].created_at,obj[item]])
-      }
-      xTmp.sort(function(a, b) {
-        return a[1] - b[1];
-      });
-      return xTmp.map(x=>{return x[2]})
-    }
   
     const socketInitializer = async () => {
 
@@ -112,25 +101,23 @@ export default function Room() {
 
         //@ts-ignore
         socketRef.current.on('new-message',(data:NewMess)=>{
-          
-          // console.log(data)
-
+        
           const {sent_to,sent_by,message} = data
-
-          console.log("received")
-
-          let newObj = messageInstance.getMessagesArray
           
-          setMessageInstance(new stockMessages([...newObj,...[message]]))
-          console.log(messageInstance.getMessagesObject)
+          console.log('set message instance (new mess)')
+          setMessageInstance(new stockMessages([...messageInstance.getMessagesArray,...[message]]))
         })
 
         //@ts-ignore
         socketRef.current.on(`sended-succes`,(data:ChatItemType)=>{
           let newObj = messageInstance.getMessagesArray
           
-          setMessageInstance(new stockMessages([...newObj,...[data]]))
-          console.log(messageInstance.getMessagesObject)
+          console.log('&&&&&&&&&&&&&&&&&&&&&&&')
+          console.log(messageInstance.getMessagesArray,newObj)
+          console.log('set message instance (sended succes)')
+          setMessageInstance(new stockMessages([...messageInstance.getMessagesArray,...[data]]))
+          console.log(messageInstance.getMessagesArray)
+          console.log('&&&&&&&&&&&&&&&&&&&&&&&')
         })
 
     }
@@ -151,6 +138,7 @@ export default function Room() {
 
         // const info = data.friendConv
         let messagesArray = data.messagesArray
+        console.log('set message instance (geted)')
         setMessageInstance(new stockMessages(messagesArray))
 
         // console.log(info.FriendShipMessages)
@@ -176,12 +164,7 @@ export default function Room() {
       console.log('send')
       //@ts-ignore
       socketRef.current.emit("message-sent-to-dm",{sent_by:user?.id,sent_to:id,content:inputValue})
-    }
-
-    function testTmp(){
-      //@ts-ignore
-      socketRef.current.emit('trya',{id:id})
-      console.log('test2')
+      console.log(messageInstance.getMessagesArray)
     }
 
 
@@ -190,31 +173,22 @@ export default function Room() {
         if(!router.isReady) return;
 
         if(user){
-          console.log('aa')
           fetchRoom()
           socketInitializer()
         }
     },[router.isReady,session])
 
   if(isRoomExist){
-
-    console.log(messageInstance.getSortedMessageArray)
-
-    console.log(messageInstance.getSortedMessageArray[messageInstance.getSortedMessageArray.length-1])
-    console.log('aaaaaa')
     
     return(
         <div>
           SALUT
-          <Button onClick={()=>{
-            testTmp()
-            console.log('test')
-          }}>test</Button>
-          <div>
+          <div className={styles.message_container}>
             {/* {JSON.stringify(MessageObj)} */}
             {messageInstance.getSortedMessageArray.map((item,i)=>(
               <div className={`${styles.msg} ${user?.id==item.sender_id?`${styles.message_our}`:`${styles.message_not_our}`}`}>
-                {item.message} <Button onClick={async ()=>{
+                <span>{item.message}</span>
+                <button className={styles.dlt} onClick={async ()=>{
                   const response = await fetch('/api/messages/delete', {
                       method: 'POST',
                       body: JSON.stringify({id:item.id}),
@@ -231,20 +205,18 @@ export default function Room() {
                   delete newObj[item.id]
                   let newArray = Object.values(newObj)
                   // @ts-ignore
+                  console.log('set message instance (delted)')
                   setMessageInstance(new stockMessages(newArray))
-                  console.log(messageInstance.getMessagesObject)
-                  // let newMsgObj = MessageObj
-                  // console.log(newMsgObj[item.id])
-                  // delete newMsgObj[item.id]
-                  // console.log(newMsgObj[item.id])
-                  // console.log(newMsgObj,item.id)
-                  // setMessagesArray(newMsgObj) // WARNING TRUC QUI BUG setMessageObj({}) ça change mais si je set avec l'object ça change pas
                 }
 
                 // console.log(data)
-                }}>Delete!</Button>
+                }}>❌</button>
               </div>
             ))}
+
+            <div className={styles.status}>
+                {messageInstance.getLastMessage.status}
+            </div>
 
             
           </div>
