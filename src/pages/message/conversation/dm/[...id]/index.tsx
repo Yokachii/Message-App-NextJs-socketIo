@@ -87,6 +87,7 @@ export default function Room() {
           const {sent_to,sent_by,message} = data
           
           console.log('set message instance (new mess)')
+          console.log(message)
           addMessage(message)
           // setMessageInstance(new stockMessages([...messageInstance.getMessagesArray,...[message]]))
         })
@@ -94,6 +95,7 @@ export default function Room() {
         //@ts-ignore
         socketRef.current.on(`sended-succes`,(data:ChatItemType)=>{
 
+          console.log(data)
           addMessage(data)
 
           // let newObj = messageInstance.getMessagesArray
