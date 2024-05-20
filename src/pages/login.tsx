@@ -15,7 +15,7 @@ import GoogleButton from "@/components/core/Login/googleButton";
 import { useSession, signIn, signOut } from "next-auth/react"
 
 const login = (props: PaperProps) => {
-  
+
   const { data: session } = useSession()
   console.log(session)
 
