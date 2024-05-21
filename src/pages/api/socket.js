@@ -71,7 +71,7 @@ const SocketHandler = async (req, res) => {
           ourFriendShip = await Friendship.findOne({where:{user1Id:sent_to,user2Id:sent_by}})
         }
         if(!ourFriendShip) return;
-        time = Date.now().toString()
+        let time = Date.now().toString()
         console.log(`date : ${time}`)
         MessagesDm.create({
           friendshipId: ourFriendShip.dataValues.id, // ID of the conversation associated with the message

@@ -161,7 +161,7 @@ export default function Room() {
             ))}
 
             <div className={styles.status}>
-                {sortArray(messagesArray)[messagesArray.length-1].status}
+                {sortArray(messagesArray)[messagesArray.length-1]?.status}
             </div>
 
             
