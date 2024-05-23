@@ -1,6 +1,8 @@
 import { Server } from 'Socket.IO'
 import { parse } from '@mliebelt/pgn-parser'
 import {Conversations,DeletedMessage,FriendRequest,Friendship,Messages,MessagesDm,Participants,User} from '@/module/association'
+import Conversation from '@/module/model/conversations'
+import sequelize from '@/module/sequelize'
 
 const SocketHandler = async (req, res) => {
   if (res.socket.server.io) {
@@ -103,6 +105,53 @@ const SocketHandler = async (req, res) => {
 
       socket.on('disconnect', async ()=>{
         console.log(`client ${socket.id} disconnected.....`)
+      })
+
+      socket.on('create-group', async data => {
+        const {userIds,groupName,groupOwner} = data
+
+        userIds.push(groupOwner)
+
+        let groupNameTmp = groupName
+
+        if(groupNameTmp==null){
+          let userNames = []
+          for (let id of userIds){
+            let tmpUser = await User.findOne({where:{id:id}})
+            userNames.push(tmpUser.dataValues.username)
+          }
+          groupNameTmp = userNames.join(', ')
+        }
+
+        const transaction = await sequelize.transaction();
+
+        try {
+          // Create a new conversation
+          const conversation = await Conversations.create(
+            {
+              creator:groupOwner,
+              title:groupNameTmp,
+              created_at:Date.now().toString(),
+              updated_at:Date.now().toString(),
+            },
+            { transaction }
+          );
+      
+          // Add the participants to the conversation
+          const participants = userIds.map(userId => ({
+            user_id: userId,
+            conversation_id: conversation.id,
+          }));
+      
+          await Participants.bulkCreate(participants, { transaction });
+      
+          await transaction.commit();
+          return conversation;
+        } catch (error) {
+          await transaction.rollback();
+          throw error;
+        }
+
       })
 
 

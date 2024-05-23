@@ -1,30 +1,43 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import {User, Friendship} from '@/module/association'
+import {User, Friendship, Conversations} from '@/module/association'
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
   if (req.method === 'POST') {
-    const {userId,room} = req.body;
-    let friendShipUser
-    const friendShip1 = Friendship.findOne({where:{user1Id:userId,user2Id:room}})
-    const friendShip2 = Friendship.findOne({where:{user1Id:room,user2Id:userId}})
-    
+    const {conversationId} = req.body;
 
-    if(friendShip1||friendShip2){
-        friendShipUser=friendShip1
-        if(!friendShipUser) friendShipUser=friendShip2
-        console.log(friendShipUser)
-
-        res
+    try {
+      const conversation = await Conversations.findOne({
+        where: { id: conversationId },
+        include: [
+          {
+            model: User,
+            as: 'ConversationUsers',
+            through: { attributes: [] }, // This removes the join table from the results
+            attributes: ['id', 'firstname', 'lastname', 'email'] // Specify the attributes you want to include
+          }
+        ]
+      });
+  
+      if (!conversation) {
+        throw new Error('Conversation not found');
+      }
+  
+      // return conversation;
+      res
             .status(201)
-            .json({ success: true, message: 'Friend geted succesfuly' });
-    }else{
-        res
+            .json({ success: true, message: 'Friend geted succesfuly', conversation:conversation });
+    } catch (error) {
+      res
             .status(422)
             .json({ success: false, message: 'An error occured', user:null });
+      return
     }
+
+        
+        
 
 
 
