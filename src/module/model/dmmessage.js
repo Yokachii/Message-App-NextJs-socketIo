@@ -1,7 +1,6 @@
 const { Sequelize, DataTypes } = require('sequelize');
 import sequelize from '../sequelize'
 import User from './user';
-import Conversation from './conversations'
 import Friendship from './friendship'
 
 const MessagesDm = sequelize.define('dm_messages', {

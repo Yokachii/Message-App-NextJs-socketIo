@@ -20,6 +20,10 @@ const SocketHandler = async (req, res) => {
       
       socket.on('set-info',data => {
         console.log(`room "User-room-${data.user.id}" joined by ${socket.id}`)
+        if(data.conv){
+          console.log(`room "Conversation-room-${data.conv}" joined by ${socket.id}`)
+          socket.join(`Conversation-room-${data.conv}`)
+        }
         socket.userId = data.user.id
         // console.log('joined : '+`User-room-${data.user.id}`)
         socket.join(`User-room-${data.user.id}`)
@@ -51,10 +55,22 @@ const SocketHandler = async (req, res) => {
               }
             ]
       })
+
+      const conversations = await Conversations.findAll({
+        include: [
+          {
+            model: User,
+            as: 'ConversationUsers',
+            through: { attributes: [] }, // This removes the join table from the results
+            where: { id: data.id },
+            attributes: ['id', 'firstname', 'lastname', 'email'] // Specify the attributes you want to include
+          }
+        ]
+      });
       
       if(!user) return
       
-      const Coversation = user.dataValues.UserConversations;
+      const Coversation = conversations?conversations:[];
       const Received = user.dataValues.FriendRequestReceiver;
       socket.emit('set-conversation',{conv:Coversation,friendReceived:Received})
       
@@ -91,9 +107,40 @@ const SocketHandler = async (req, res) => {
             id:x.id,
           }
           const newData = {sent_to,sent_by,message:messageItem}
-          x.update({status:"distribut"})
           io.to(`User-room-${data.sent_to}`).emit(`new-message`,newData)
           io.to(`User-room-${sent_by}`).emit(`sended-succes`,messageItem)
+          // io.to(`User-room-${sent_to}`).emit(`new-message`,{...data,...{message:messageItem,date:new Date(),username:user1.dataValues.username}})
+        })
+        
+      })
+
+      socket.on('message-sent-to-group', async data => {
+        const {sent_group,sent_by,content,} = data
+        console.log(`Conversation-room-${sent_group}`)
+        
+        const conv = Conversation.findByPk(sent_group)
+        if(!conv) return console.log(bizzardddddd);
+        let time = Date.now().toString()
+        Messages.create({
+          conversation_id: sent_group, // ID of the conversation associated with the message
+          sender_id: sent_by, // ID of the user who sent the message
+          message: content, // Content of the message
+          created_at: time, // Current timestamp or any other appropriate value
+          updated_at: time,
+          status:"sended",
+        }).then(x=>{
+          const messageItem = {
+            sender_id:sent_by,
+            pdp:`https://maville.com/photosmvi/2016/09/27/P1D3055327G.jpg`,
+            message:content,
+            created_at:time,
+            updated_at:time,
+            status:"distribut",
+            id:x.id,
+          }
+          const newData = {sent_group,sent_by,message:messageItem}
+          io.to(`Conversation-room-${data.sent_group}`).emit(`new-message`,newData)
+          io.to(`Conversation-room-${sent_by}`).emit(`sended-succes`,messageItem)
           // io.to(`User-room-${sent_to}`).emit(`new-message`,{...data,...{message:messageItem,date:new Date(),username:user1.dataValues.username}})
         })
         

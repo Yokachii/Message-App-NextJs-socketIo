@@ -65,7 +65,7 @@ export default function Room() {
         socketRef.current.on('set-socket', (data:string) => {
             setSocketId(data)
             //@ts-ignore
-            socketRef.current.emit('set-info', {user})
+            socketRef.current.emit('set-info', {user,conv:id})
         })
 
         //@ts-ignore
@@ -86,9 +86,11 @@ export default function Room() {
 
     const fetchRoom = async () => {
         // Fetch the api
-        const response = await fetch('/api/messages/getmessagedm', {
+        console.log('aaaaaaaaaaaa')
+        console.log(id)
+        const response = await fetch('/api/messages/getconversation', {
             method: 'POST',
-            body: JSON.stringify({id1:user?.id,id2:id,from:0,to:10}),
+            body: JSON.stringify({id:id}),
             headers: {
               'Content-Type': 'application/json',
             },
@@ -98,7 +100,8 @@ export default function Room() {
 
       if(data.success){
 
-        let arrayTmp = data.messagesArray
+        console.log(data)
+        let arrayTmp = data.conversation.ConversationMessages
         setMessagesArray(arrayTmp)
 
         setIsRoomExist(true)
@@ -114,7 +117,7 @@ export default function Room() {
     async function sendAMessage(){
       console.log('send')
       //@ts-ignore
-      socketRef.current.emit("message-sent-to-dm",{sent_by:user?.id,sent_to:id,content:inputValue})
+      socketRef.current.emit("message-sent-to-group",{sent_by:user?.id,sent_group:id,content:inputValue})
     }
 
 

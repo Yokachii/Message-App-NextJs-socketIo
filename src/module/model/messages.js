@@ -32,8 +32,18 @@ const Messages = sequelize.define('messages', {
     },
     created_at:{
         type: DataTypes.TEXT,
-        allowNull: false
+        allowNull: false,
+        defaultValue: DataTypes.NOW,
     },
+    updated_at: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW,
+    },
+    status: {
+        type: DataTypes.TEXT,
+        allowNull:false,
+    }
 }, {
     timestamps: false,
     tableName: 'messages',

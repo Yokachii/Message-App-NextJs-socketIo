@@ -18,6 +18,11 @@ type User = {
   id:string,
 }
 
+type conv = {
+  title:string,
+  id:string,
+}
+
 import { IconCheck } from "@tabler/icons-react";
 import { GetServerSidePropsContext } from "next";
 
@@ -32,7 +37,7 @@ export default function Room() {
 
     const [socketId,setSocketId] = useState('')
     const socketRef = useRef(null)
-    const [conversations,setConversations] = useState<Array<Record<string,string>>>([])
+    const [conversations,setConversations] = useState<Array<conv>>([])
     const [receivedFriend,setReceivedFriend] = useState([])
     const [friendsDisplay,setFriendsDisplay] = useState<Array<User>>([])
   
@@ -114,9 +119,17 @@ export default function Room() {
 
           <Button><Link href={`/message/create-group`}>Create a group</Link></Button>
 
-          <div>
+          <div className={styles.dms}>
+            Dm:
             {friendsDisplay.map((item,i)=>(
               <Link href={`/message/conversation/dm/${item.id}`}><div key={i}>{item?.username}</div></Link>
+            ))}
+          </div>
+
+          <div className={styles.groups}>
+            Conv:
+            {conversations.map((item,i)=>(
+              <Link href={`/message/conversation/group/${item.id}`}><div key={i}>{item?.title}</div></Link>
             ))}
           </div>
         </div>

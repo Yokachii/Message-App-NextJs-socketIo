@@ -1,43 +1,27 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import {User, Friendship, Conversations} from '@/module/association'
+import {User, Friendship, MessagesDm, Messages} from '@/module/association'
+import { Op } from 'sequelize';
+import Conversation from '@/module/model/conversations';
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
   if (req.method === 'POST') {
-    const {conversationId} = req.body;
+    const {id} = req.body;
 
-    try {
-      const conversation = await Conversations.findOne({
-        where: { id: conversationId },
-        include: [
-          {
-            model: User,
-            as: 'ConversationUsers',
-            through: { attributes: [] }, // This removes the join table from the results
-            attributes: ['id', 'firstname', 'lastname', 'email'] // Specify the attributes you want to include
-          }
-        ]
-      });
-  
-      if (!conversation) {
-        throw new Error('Conversation not found');
-      }
-  
-      // return conversation;
-      res
+    let conversation = await Conversation.findByPk(id,{ include: 'ConversationMessages'  })
+
+    if(conversation){
+
+        res
             .status(201)
-            .json({ success: true, message: 'Friend geted succesfuly', conversation:conversation });
-    } catch (error) {
-      res
+            .json({ success: true, message: 'Friend geted succesfuly', conversation });
+    }else{
+        res
             .status(422)
-            .json({ success: false, message: 'An error occured', user:null });
-      return
+            .json({ success: false, message: 'An error occured', conversation:null });
     }
-
-        
-        
 
 
 
